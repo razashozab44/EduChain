@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- WalletConnect for mobile -->
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     <style>
         :root {
             --primary-blue: #1e3a8a;
@@ -18,6 +20,7 @@
             --gradient-bg: linear-gradient(135deg, #1e3a8a 0%, #10b981 100%);
             --shadow: 0 10px 25px rgba(0,0,0,0.1);
             --glow: 0 0 20px rgba(16, 185, 129, 0.5);
+            --featured-glow: 0 0 30px rgba(245, 158, 11, 0.8);
         }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -36,6 +39,44 @@
             box-shadow: var(--shadow); 
             animation: fadeInDown 1s ease;
         }
+        .featured-team {
+            background: linear-gradient(135deg, var(--accent-gold), var(--secondary-green));
+            color: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem;
+            box-shadow: var(--featured-glow);
+            text-align: center;
+            animation: fadeInUp 1s ease;
+        }
+        .featured-team h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .featured-team p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+        }
+        .featured-team .email {
+            font-weight: bold;
+            color: var(--primary-blue);
+            background: var(--white);
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .exhibition-note {
+            background: var(--white);
+            color: var(--accent-gold);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: var(--glow);
+            animation: pulse 2s infinite;
+        }
         nav { 
             background: var(--white); 
             padding: 1rem; 
@@ -45,20 +86,35 @@
             top: 0; 
             z-index: 1000; 
         }
-        nav button { 
+        .btn {
             background: var(--primary-blue); 
             color: var(--white); 
             border: none; 
-            padding: 0.5rem 1rem; 
-            margin: 0 0.5rem; 
-            border-radius: 5px; 
+            padding: 0.8rem 1.5rem; 
+            margin: 0.5rem; 
+            border-radius: 25px; 
             cursor: pointer; 
             transition: all 0.3s ease; 
+            font-weight: bold; 
+            min-width: 150px;
+            box-shadow: var(--shadow);
         }
-        nav button:hover { 
+        .btn:hover:not(:disabled) { 
             background: var(--secondary-green); 
             transform: scale(1.05); 
             box-shadow: var(--glow); 
+        }
+        .btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        .btn-gold {
+            background: var(--accent-gold);
+            color: var(--primary-blue);
+        }
+        .btn-gold:hover {
+            background: var(--secondary-green);
+            color: var(--white);
         }
         section { 
             padding: 2rem; 
@@ -73,6 +129,8 @@
             padding: 4rem 2rem; 
             position: relative; 
             overflow: hidden; 
+            border-radius: 20px;
+            margin: 1rem;
         }
         .hero::before { 
             content: ''; 
@@ -182,22 +240,74 @@
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
         }
+        @keyframes pulse { 
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } 
+        }
         .animate__animated { 
             animation-duration: 1s; 
+        }
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .btn { min-width: 120px; padding: 0.6rem 1rem; font-size: 0.9rem; }
+            .team { grid-template-columns: 1fr; }
+            section { padding: 1rem; }
+            nav { padding: 0.5rem; }
+            nav button { display: block; margin: 0.5rem auto; width: 80%; }
+            .instructions-step { padding: 1rem; }
+            .badge-preview { width: 150px; height: 150px; font-size: 1.2rem; }
+        }
+        /* WalletConnect QR Modal for Mobile */
+        #wcModal { 
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        #wcModal .modal-content { 
+            background-color: var(--white); 
+            margin: 15% auto; 
+            padding: 20px; 
+            border-radius: 10px; 
+            width: 80%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        #qrCode { 
+            margin: 1rem auto; 
         }
     </style>
 </head>
 <body>
+    <!-- Featured Team Box at Top -->
+    <div class="featured-team">
+        <h2>Meet the Team</h2>
+        <p><strong>Project Lead:</strong> Muhammad Shozab Raza</p>
+        <p><strong>Co-Lead:</strong> Haroon</p>
+        <p class="email">Email: <a href="mailto:razashozab619@gmail.com" style="color: inherit;">razashozab619@gmail.com</a></p>
+    </div>
+
+    <div class="exhibition-note">
+        🌟 <strong>Presenting soon in December at DPS Sahiwal Science Exhibition!</strong> 🌟
+    </div>
+
     <header>
         <h1 class="animate__animated animate__fadeInDown">EduChain Badge</h1>
         <p class="animate__animated animate__fadeInUp">Unlock Blockchain Learning with Science!</p>
     </header>
 
     <nav>
-        <button onclick="showPage('home')">Home</button>
-        <button onclick="showPage('instructions')">Instructions</button>
-        <button onclick="showPage('quiz')">Start Quiz</button>
-        <button onclick="showPage('results')">Results</button>
+        <button class="btn" onclick="showPage('home')">Home</button>
+        <button class="btn" onclick="showPage('instructions')">Instructions</button>
+        <button class="btn" onclick="showPage('quiz')">Start Quiz</button>
+        <button class="btn" onclick="showPage('results')">Results</button>
     </nav>
 
     <!-- Home Page -->
@@ -254,12 +364,12 @@
         <div id="walletInfo" class="hidden">
             Connected: <span id="address"></span> | Network: <span id="network"></span>
         </div>
-        <button id="connectBtn" onclick="connectWallet()" style="display: block;">Connect MetaMask</button>
+        <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block;">Connect MetaMask</button>
         <div id="topics" class="hidden">
             <p>Select a topic for your 10-question adaptive quiz:</p>
-            <button onclick="startQuiz('physics')">Physics (Energy, Light, Electricity, Motion)</button>
-            <button onclick="startQuiz('chemistry')">Chemistry (Reactions, Clean Energy)</button>
-            <button onclick="startQuiz('biologyEnv')">Biology & Environment (Body, Health, Water/Waste)</button>
+            <button class="btn" onclick="startQuiz('physics')">Physics (Energy, Light, Electricity, Motion)</button>
+            <button class="btn" onclick="startQuiz('chemistry')">Chemistry (Reactions, Clean Energy)</button>
+            <button class="btn" onclick="startQuiz('biologyEnv')">Biology & Environment (Body, Health, Water/Waste)</button>
         </div>
         <div id="quiz-container" class="quiz hidden">
             <div class="progress-bar">
@@ -267,7 +377,7 @@
             </div>
             <h2 id="question"></h2>
             <div id="options"></div>
-            <button id="nextBtn" onclick="advanceQuestion()" disabled>Next</button>
+            <button id="nextBtn" class="btn" onclick="advanceQuestion()" disabled>Next</button>
         </div>
     </section>
 
@@ -280,13 +390,24 @@
             <div id="emailInput">
                 <p>For first-time upload, enter your Storacha email:</p>
                 <input type="email" id="userEmail" placeholder="your@email.com">
-                <button onclick="validateEmail()">Validate & Claim NFT</button>
+                <button class="btn" onclick="validateEmail()">Validate & Claim NFT</button>
             </div>
-            <button id="claimBtn" onclick="claimNFT()" disabled>Claim NFT Badge (≥80% Required)</button>
-            <button onclick="restart()">Restart Quiz</button>
+            <button id="claimBtn" class="btn" onclick="claimNFT()" disabled>Claim NFT Badge (≥80% Required)</button>
+            <button class="btn" onclick="restart()">Restart Quiz</button>
             <p id="txStatus"></p>
         </div>
     </section>
+
+    <!-- WalletConnect Modal for Mobile -->
+    <div id="wcModal">
+        <div class="modal-content">
+            <h3>Connect on Mobile</h3>
+            <p>Scan QR with MetaMask Mobile App:</p>
+            <div id="qrCode"></div>
+            <button class="btn" onclick="connectWalletConnect()">Connect</button>
+            <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
 
     <footer>
         <p>&copy; 2025 EduChain Badge | Project Lead: Muhammad Shozab Raza | Co-Lead: Haroon | Built with ❤️ for Science & Blockchain</p>
