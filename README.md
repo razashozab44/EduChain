@@ -5,7 +5,7 @@
 
 EduChain Badge is a Web3 decentralized application (dApp) that gamifies science education through interactive quizzes. Users earn verifiable NFT badges on the blockchain upon achieving high scores (80%+). Built for the DPS Sahiwal Science Exhibition (December 2025), it bridges traditional learning with blockchain credentials—proving knowledge immutably!
 
-**Live Demo:** [Coming Soon – Exhibition Launch](https://your-deployed-url.netlify.app) | **Test on Base Sepolia**
+**Live Demo:** [Coming Soon – Exhibition Launch](https://educationalchain.netlify.app) | **Test on Base Sepolia**
 
 ## 🌟 Features
 
