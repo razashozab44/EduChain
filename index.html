@@ -66,6 +66,14 @@
             border-radius: 5px;
             display: inline-block;
         }
+        .featured-team a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .featured-team a:hover {
+            text-decoration: underline;
+        }
         .exhibition-note {
             background: var(--white);
             color: var(--accent-gold);
@@ -76,6 +84,32 @@
             font-weight: bold;
             box-shadow: var(--glow);
             animation: pulse 1s infinite;
+        }
+        .base-integration {
+            background: linear-gradient(135deg, var(--primary-blue), #0ea5e9);
+            color: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            text-align: center;
+            box-shadow: var(--glow);
+            animation: fadeInUp 1s ease 0.5s both;
+            border: 2px solid var(--accent-gold);
+        }
+        .base-integration h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .base-integration p {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+        }
+        .base-logo {
+            width: 120px;
+            height: auto;
+            margin: 1rem;
+            animation: bounce 2s infinite;
         }
         nav { 
             background: var(--white); 
@@ -245,6 +279,11 @@
             70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } 
         }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
         .animate__animated { 
             animation-duration: 1s; 
         }
@@ -259,6 +298,8 @@
             nav button { display: block; margin: 0.5rem auto; width: 80%; }
             .instructions-step { padding: 1rem; }
             .badge-preview { width: 150px; height: 150px; font-size: 1.2rem; }
+            .base-logo { width: 80px; }
+            .base-integration h3 { font-size: 1.5rem; }
         }
         /* WalletConnect QR Modal for Mobile */
         #wcModal { 
@@ -310,11 +351,24 @@
         <p><strong>Project Lead:</strong> Muhammad Shozab Raza</p>
         <p><strong>Co-Lead:</strong> Haroon</p>
         <p class="email">Email: <a href="mailto:razashozab619@gmail.com" style="color: inherit;">razashozab619@gmail.com</a></p>
+        <p><strong>X (Twitter):</strong> <a href="https://x.com/nakamotodrip" target="_blank">@nakamotodrip</a></p>
     </div>
 
     <div class="exhibition-note">
         🌟 <strong>Presenting soon in December at DPS Sahiwal Science Exhibition!</strong> 🌟
     </div>
+
+    <!-- Launching on Base Section -->
+    <div class="base-integration">
+        <h3>🚀 Launching Soon on Base Chain</h3>
+        <img 
+            src="Base_lockup_white.png" 
+            alt="Base Chain Logo" 
+            class="base-logo"
+        />
+        <p>Exciting integration coming to bring low-cost, secure badge minting on Ethereum L2!</p>
+    </div>
+
         <a href="#quiz" class="cta-button animate__animated animate__pulse animate__infinite">Get Started</a>
         <p style="margin-top: 2rem; font-style: italic;">"Science is not only compatible with spirituality; it is a profound source of spirituality." — Carl Sagan</p>
     </section>
