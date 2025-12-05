@@ -1,0 +1,76 @@
+<!-- Quiz Page: quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - STEMChain</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>STEMChain</h1>
+        <p>Take the Challenge and Win Badges</p>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="instructions.html">Instructions</a>
+        <a href="quiz.html">Quiz</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+    <section>
+        <h2>Pick Your STEM Adventure</h2>
+        <p>Choose a topic, answer 10 questions, and if you score 80% or more, mint a cool badge on Base Chain. It's fun and shows what you know!</p>
+        <div id="walletInfo" class="hidden">
+            Connected: <span id="address"></span> | Network: <span id="network"></span>
+        </div>
+        <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block;">Connect Wallet</button>
+        <div id="topics" class="hidden">
+            <button class="btn" onclick="startQuiz('physics')">Physics</button>
+            <button class="btn" onclick="startQuiz('chemistry')">Chemistry</button>
+            <button class="btn" onclick="startQuiz('biologyEnv')">Biology & Environment</button>
+        </div>
+        <div id="quiz-container" class="hidden">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <h3 id="question"></h3>
+            <div id="options"></div>
+            <button id="nextBtn" class="btn" onclick="advanceQuestion()" disabled>Next</button>
+        </div>
+        <div id="result" class="hidden">
+            <h2>Your Score</h2>
+            <p>Score: <span id="score"></span>/10</p>
+            <p id="message"></p>
+            <div id="badgePreview" class="hidden"></div>
+            <div id="emailInput">
+                <p>Enter your Storacha email to upload:</p>
+                <input type="email" id="userEmail" placeholder="your@email.com">
+                <button class="btn" onclick="validateEmail()">Validate & Mint</button>
+            </div>
+            <button id="claimBtn" class="btn" onclick="claimNFT()" disabled>Mint Your Badge</button>
+            <button class="btn" onclick="restart()">Try Again</button>
+            <p id="txStatus"></p>
+        </div>
+        <div id="wcModal" style="display: none;">
+            <div>
+                <h3>Mobile Connect</h3>
+                <p>Scan with MetaMask:</p>
+                <div id="qrCode"></div>
+                <button class="btn" onclick="connectWalletConnect()">Connect</button>
+                <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2025 STEMChain | Powered by Base Chain for Real Learning Wins</p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
