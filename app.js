@@ -324,57 +324,123 @@ function initCursorDots() {
     }
 }
 
-// ========== WALLET CONNECT SETUP ==========
+// ========== WALLETCONNECT WEB SDK SETUP ==========
+let wcModal = null;
+const projectId = 'YOUR_PROJECT_ID'; // Get from https://cloud.walletconnect.com
+
+// Initialize WalletConnect Modal
+async function initWalletConnectModal() {
+    if (wcModal || typeof window.WalletConnectModal === 'undefined') {
+        return;
+    }
+
+    wcModal = new window.WalletConnectModal.WalletConnectModal({
+        projectId: projectId,
+        chains: [8453, 84532], // Base Mainnet and Base Sepolia
+        methods: ['eth_sendTransaction', 'eth_signMessage', 'eth_sign', 'personal_sign'],
+        events: ['chainChanged', 'accountsChanged'],
+        explorerRecommendedWalletIds: ['c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'], // MetaMask
+    });
+}
+
+// Connect via WalletConnect
+async function connectWalletConnect() {
+    try {
+        if (!wcModal) {
+            await initWalletConnectModal();
+        }
+
+        if (!wcModal) {
+            alert('WalletConnect not available. Please try MetaMask.');
+            return;
+        }
+
+        // Open WalletConnect modal - shows QR code and wallet options
+        wcModal.openModal();
+
+        // Listen for session changes
+        wcModal.subscribeModal((state) => {
+            if (!state.open && state.data?.session) {
+                const session = state.data.session;
+                if (session.accounts && session.accounts.length > 0) {
+                    const userAddress = session.accounts[0];
+                    handleWalletConnected(userAddress, 'walletconnect');
+                }
+            }
+        });
+    } catch (error) {
+        console.error('WalletConnect error:', error);
+        alert('WalletConnect connection failed. Try MetaMask instead.');
+    }
+}
+
+// Connect via MetaMask
+async function connectMetaMask() {
+    try {
+        if (typeof window.ethereum === 'undefined') {
+            alert('Please install MetaMask extension');
+            return null;
+        }
+
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+
+        if (accounts && accounts.length > 0) {
+            handleWalletConnected(accounts[0], 'metamask');
+            return accounts[0];
+        }
+    } catch (error) {
+        console.error('MetaMask connection error:', error);
+        alert('MetaMask connection failed: ' + error.message);
+        return null;
+    }
+}
+
+// Unified wallet connection handler
+async function handleWalletConnected(userAddress, walletType) {
+    try {
+        if (walletType === 'metamask') {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+        } else if (walletType === 'walletconnect') {
+            // Use Base chain RPC for WalletConnect
+            provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
+        }
+
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        localStorage.setItem('connectedWallet', userAddress);
+        localStorage.setItem('walletProvider', walletType);
+
+        console.log('✓ Wallet connected:', userAddress, `(${walletType})`);
+
+        // Update UI
+        document.getElementById('topics').classList.remove('hidden');
+        document.getElementById('connectBtn').style.display = 'none';
+        document.getElementById('walletSelector').style.display = 'none';
+    } catch (error) {
+        console.error('Wallet connection error:', error);
+        alert('Connection setup failed: ' + error.message);
+    }
+}
+
+// Main connect function
 async function connectWallet() {
     const selectedWallet = document.getElementById('walletSelect')?.value || 'metamask';
 
-    try {
-        if (selectedWallet === 'walletconnect') {
-            // WalletConnect integration would go here
-            // For now, we'll handle MetaMask
-            console.log('WalletConnect selected - implementation coming');
-        }
-
-        // MetaMask connection
-        if (typeof window.ethereum !== 'undefined') {
-            const accounts = await window.ethereum.request({
-                method: 'eth_requestAccounts'
-            });
-
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-            const userAddress = accounts[0];
-            localStorage.setItem('connectedWallet', userAddress);
-            localStorage.setItem('walletProvider', selectedWallet);
-
-            console.log('Wallet connected:', userAddress);
-
-            // Update UI to show connected state
-            const connectBtn = document.querySelector('[onclick*="connectWallet"]');
-            if (connectBtn) {
-                connectBtn.textContent = 'Wallet Connected ✓';
-                connectBtn.disabled = true;
-            }
-
-            return userAddress;
-        } else {
-            alert('Please install MetaMask or use WalletConnect');
-            return null;
-        }
-    } catch (error) {
-        console.error('Wallet connection error:', error);
-        alert('Failed to connect wallet: ' + error.message);
-        return null;
+    if (selectedWallet === 'walletconnect') {
+        await connectWalletConnect();
+    } else {
+        await connectMetaMask();
     }
 }
 
 // Check if wallet is already connected
 function checkWalletConnection() {
     const connectedWallet = localStorage.getItem('connectedWallet');
-    const provider = localStorage.getItem('walletProvider');
-    return { connectedWallet, provider };
+    const walletProvider = localStorage.getItem('walletProvider');
+    return { connectedWallet, walletProvider };
 }
 
 // Load Storacha on script load
