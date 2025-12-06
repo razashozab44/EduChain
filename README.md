@@ -1,112 +1,120 @@
-# EduChain Badge 🚀
+# STEMChain 🚀
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Made with ❤️ for Science & Blockchain](https://img.shields.io/badge/Made%20with-React%20%26%20Web3-orange)](https://reactjs.org/)
+[![Made with ❤️ for STEM & Blockchain](https://img.shields.io/badge/Made%20with-Vanilla%20JS%20%26%20Web3-blue)](https://ethers.org/)
 
-EduChain Badge is a Web3 decentralized application (dApp) that gamifies science education through interactive quizzes. Users earn verifiable NFT badges on the blockchain upon achieving high scores (80%+). Built for the DPS Sahiwal Science Exhibition (December 2025), it bridges traditional learning with blockchain credentials—proving knowledge immutably!
+STEMChain is a Web3 decentralized application (dApp) that makes STEM education interactive and rewarding. Students dive into quizzes on Science, Technology, Engineering, and Mathematics, earning verifiable NFT badges on the blockchain for scores of 80% or higher. Created for the DPS Sahiwal Science Exhibition (December 2025), it connects classroom learning with secure digital credentials, helping users build a tamper-proof portfolio of achievements.
 
-**Live Demo:** [Coming Soon – Exhibition Launch](https://educationalchain.netlify.app) | **Test on Base Sepolia**
+**Live Demo:** [Try It Now](https://your-deployed-url.netlify.app) | **Test on Base Sepolia**
 
 ## 🌟 Features
 
-- **Interactive Science Quizzes**: Adaptive 10-question quizzes on Physics, Chemistry, Biology & Environment (expandable topics).
-- **Blockchain Badge Minting**: Mint ERC-721 NFTs with metadata stored on Storacha (IPFS-based) for tamper-proof credentials.
-- **Wallet Integration**: Seamless MetaMask support + WalletConnect for mobile.
-- **Testnet Ready**: Deployed on Base Sepolia for low-cost, fast transactions (Ethereum L2 by Coinbase).
-- **Exhibition-Ready UI**: Animated, responsive design with confetti celebrations, progress bars, and Carl Sagan quotes for inspiration.
-- **Verifiable Achievements**: Badges include score, topic, and difficulty—viewable on Basescan.
-- **Coming Soon**: Full integration with Base Mainnet for production-grade, gas-efficient minting!
+- **Engaging STEM Quizzes**: 10-question adaptive challenges covering Physics, Chemistry, Biology & Environment, with plans to expand into Engineering and Math.
+- **Secure Badge Minting**: Create ERC-721 NFTs with metadata on Storacha (IPFS-powered) for fraud-proof proof of knowledge.
+- **Wallet Support**: Easy integration with MetaMask and WalletConnect for mobile users.
+- **Efficient Blockchain**: Runs on Base Sepolia testnet for quick, low-cost transactions (Ethereum L2 from Coinbase).
+- **Dynamic UI**: Responsive design with animations, progress tracking, and motivational quotes like Carl Sagan's to keep things fun.
+- **Verifiable Results**: Badges detail your score, topic, and date—check them anytime on Basescan.
+- **Future-Ready**: Upcoming Base Mainnet launch for real-world use, plus social sharing and rewards.
 
 ## 🛠 Tech Stack
 
 | Category | Technologies |
 |----------|--------------|
-| **Frontend** | HTML5, CSS3 (Custom Animations with Animate.css), Vanilla JS + Ethers.js v5 |
-| **Blockchain** | Ethereum/Base (Sepolia Testnet), ERC-721 Smart Contract (Remix-deployed) |
-| **Storage** | Storacha (Decentralized IPFS pinning) for NFT metadata |
-| **Wallets** | MetaMask, WalletConnect (v1) |
-| **Libraries** | Canvas Confetti (celebrations), QRCode.js (mobile connect) |
-| **Deployment** | Netlify/Vercel (Static Hosting) |
+| **Frontend** | HTML5, CSS3 (with Animate.css for effects), Vanilla JS + Ethers.js v5 |
+| **Blockchain** | Ethereum/Base (Sepolia Testnet), ERC-721 Smart Contract (deployed via Remix) |
+| **Storage** | Storacha for decentralized IPFS metadata storage |
+| **Wallets** | MetaMask, WalletConnect v2 |
+| **Libraries** | Canvas Confetti (for celebrations), QRCode.js (mobile connects) |
+| **Deployment** | Netlify/Vercel for static hosting |
 
 ## 🚀 Quick Start
 
 1. **Clone the Repo**:
    ```
-   git clone https://github.com/razashozab44/EduChain.git
-   cd EduChain
+   git clone https://github.com/yourusername/stemchain.git
+   cd stemchain
    ```
 
-2. **Open in Browser**:
-   - Double-click `index.html` or serve locally: `npx http-server` (install via npm if needed).
-   - No build step—it's a static dApp!
+2. **Run Locally**:
+   - Open `index.html` in your browser or use `npx http-server` (install npm if needed).
+   - Static setup—no build required!
 
-3. **Connect & Play**:
-   - Follow on-screen instructions: Add Base Sepolia to MetaMask, claim test ETH from faucet.
-   - Start quiz → Score 80%+ → Mint your badge!
+3. **Connect and Quiz**:
+   - Set up your wallet per instructions.
+   - Pick a topic, quiz up, score high, and mint!
 
 ## 📋 Installation & Setup
 
 ### Prerequisites
-- **MetaMask Browser Extension**: [Download](https://metamask.io).
-- **Node.js** (for local dev/server): [Download](https://nodejs.org) (optional).
-- **Test ETH**: Use [Base Sepolia Faucet](https://portal.cdp.coinbase.com/products/faucet).
+- **MetaMask Extension**: [Get it here](https://metamask.io).
+- **Node.js** (optional for local server): [Download](https://nodejs.org).
+- **Test ETH**: Grab from [Base Sepolia Faucet](https://portal.cdp.coinbase.com/products/faucet).
 
-### Detailed Setup
-1. **Add Base Sepolia Network** (in MetaMask > Networks > Add Network):
-   - **Name**: Base Sepolia
-   - **RPC URL**: `https://sepolia.base.org`
-   - **Chain ID**: `84532`
-   - **Currency Symbol**: ETH
-   - **Block Explorer**: `https://sepolia.basescan.org`
+### Step-by-Step
+1. **Add Base Sepolia** (MetaMask > Networks > Add):
+   - Name: Base Sepolia
+   - RPC: https://sepolia.base.org
+   - Chain ID: 84532
+   - Symbol: ETH
+   - Explorer: https://sepolia.basescan.org
 
-2. **Claim Test Tokens**:
-   - Visit the faucet, connect MetaMask, and claim 0.5 ETH (wait 1-2 mins).
+2. **Get Test Tokens**:
+   - Connect to the faucet and claim 0.5 ETH (takes a minute).
 
-3. **Deploy Contract** (if customizing):
-   - Use Remix IDE: Paste ABI/contract code, deploy to Base Sepolia.
-   - Update `app.js` with your `CONTRACT_ADDRESS`.
+3. **Custom Contract** (optional):
+   - Deploy via Remix to Base Sepolia.
+   - Edit `app.js` with new CONTRACT_ADDRESS.
 
-4. **Storacha Setup** (for metadata):
-   - Sign up at [storacha.io](https://storacha.io), get your `SPACE_DID`.
-   - Update in `app.js`: `const SPACE_DID = 'your-did-here';`
+4. **Storacha Config**:
+   - Register at [storacha.io](https://storacha.io) for SPACE_DID.
+   - Update in `app.js`.
 
-### Local Development
-- Serve files: `npx http-server -p 3000` (or use VS Code Live Server).
-- Test minting: Ensure contract is owner-only or public mint.
+### Development Tips
+- Local server: `npx http-server -p 3000`.
+- Test mints: Switch to testnet; ensure public mint or owner access.
 
 ## 📖 Usage
 
-1. **Home**: Welcome screen with team credits, exhibition note, and Base Chain teaser.
-2. **Instructions**: Step-by-step wallet setup.
-3. **Quiz**: Select topic → Answer questions → Track progress.
-4. **Results**: View score → If ≥80%, claim NFT (email validation for Storacha).
-5. **Mobile**: Use WalletConnect QR for iOS/Android MetaMask.
+1. **Home**: Get an overview, meet the team, and see exhibition details.
+2. **Instructions**: Easy guide to wallet setup.
+3. **Quiz**: Connect, choose topic, answer away—track progress with bars.
+4. **Results**: Check score; mint if you qualify (Storacha email needed).
+5. **Mobile**: WalletConnect QR for on-the-go.
 
-**Pro Tip**: For exhibition demo, pre-mint sample badges and showcase on a projector—highlight the Base L2 speed vs. Ethereum!
+Demo Tip: For the exhibition, show live mints—highlight Base's speed over regular Ethereum!
+
+## 📅 Roadmap
+
+We're growing STEMChain into a full SocialFi platform:
+- **Q1 2026**: Core updates, more STEM topics, Base Mini App integration.
+- **Q2 2026**: Community features like forums and leaderboards.
+- **Q3 2026**: $STEM token rewards, badge staking.
+- **Q4 2026+**: Global partnerships, AI quizzes, multi-chain support.
 
 ## 🤝 Contributing
 
-1. Fork the repo.
-2. Create a feature branch: `git checkout -b feat/amazing-idea`.
-3. Commit changes: `git commit -m 'Add cool feature'`.
-4. Push: `git push origin feat/amazing-idea`.
-5. Open a Pull Request!
+1. Fork it.
+2. Branch: `git checkout -b your-feature`.
+3. Commit: `git commit -m 'Added something cool'`.
+4. Push: `git push origin your-feature`.
+5. PR time!
 
-Ideas welcome: More quiz topics? AI-generated questions? Multi-language support?
+Suggestions? New topics, better UI—let's chat!
 
 ## 📄 License
 
-This project is MIT licensed. See [LICENSE](LICENSE) for details.
+MIT License—see [LICENSE](LICENSE) for info.
 
 ## 👥 Credits
 
 - **Project Lead**: Muhammad Shozab Raza ([X: @nakamotodrip](https://x.com/nakamotodrip) | [Email](mailto:razashozab619@gmail.com))
 - **Co-Lead**: Haroon
-- **Built With**: Grok by xAI (for code tweaks & ideas)
-- **Inspiration**: DPS Sahiwal Science Exhibition 2025 – Merging Science, Spirituality, and Blockchain!
+- **Helpers**: Grok by xAI for code ideas
+- **Inspo**: DPS Sahiwal Science Exhibition 2025—blending STEM, spirit, and blockchain!
 
 **Quote**: *"Science is not only compatible with spirituality; it is a profound source of spirituality."* – Carl Sagan
 
 ---
 
-⭐ Star this repo if it sparks your Web3 education journey! Questions? DM @nakamotodrip on X. #EduChain #Web3Education #DPSExhibition
+⭐ Give us a star if this fires up your STEM journey! Questions? Hit up @nakamotodrip on X. #STEMChain #Web3Ed #DPSExhibition
