@@ -326,7 +326,7 @@ function initCursorDots() {
 
 // ========== WALLETCONNECT WEB SDK SETUP ==========
 let wcModal = null;
-const projectId = 'YOUR_PROJECT_ID'; // Get from https://cloud.walletconnect.com
+const projectId = '2f35b9dea29b453ee5258df53f727b1a'; // Get from https://cloud.walletconnect.com
 
 // Initialize WalletConnect Modal
 async function initWalletConnectModal() {
