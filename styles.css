@@ -1,97 +1,225 @@
-/* styles.css - Blue and Black Combo for STEMChain (White Logo Pops) */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+/* styles.css - Professional STEM Chain */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
 
 :root {
-    --primary-blue: #0052D4; /* Deep blue for headers/accents */
-    --secondary-blue: #4A90E2; /* Lighter blue for links/hovers */
-    --black-bg: #0D1117; /* Dark black background for contrast */
-    --dark-gray: #21262D; /* Softer dark for sections */
+    --primary-blue: #0052D4;
+    --secondary-blue: #4A90E2;
+    --accent-blue: #005FFF;
     --white: #FFFFFF;
-    --text-light: #C9D1D9; /* Light text for readability on dark */
-    --accent-green: #2E7D32; /* Toned green for buttons */
-    --shadow: 0 4px 12px rgba(0, 82, 212, 0.2);
-    --gradient-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-    --timeline-color: #FFD700; /* Gold for roadmap */
+    --black: #000000;
+    --light-bg: #F5F7FA;
+    --light-card: #FFFFFF;
+    --text-dark: #1A1A1A;
+    --text-light: #4A5568;
+    --border-light: #E2E8F0;
+    --accent-green: #2E7D32;
+    --shadow-light: 0 4px 12px rgba(0, 82, 212, 0.1);
+    --shadow-hover: 0 8px 24px rgba(0, 82, 212, 0.15);
+    --gradient-bg: linear-gradient(135deg, #0052D4 0%, #4A90E2 100%);
+    --timeline-color: #FFD700;
+    --button-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+    
+    --bg: var(--light-bg);
+    --card-bg: var(--light-card);
+    --text: var(--text-dark);
+    --text-secondary: var(--text-light);
+    --border: var(--border-light);
+    --shadow: var(--shadow-light);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    scroll-behavior: smooth;
 }
 
 body {
     font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: var(--black-bg);
-    color: var(--text-light);
+    background: var(--bg);
+    color: var(--text);
     line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
+/* Interactive Cursor Dots */
+.cursor-dot {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    display: none;
+}
+
+/* Header with Logo */
 header {
     background: var(--gradient-bg);
-    color: var(--white);
-    padding: 1.5rem 0;
+    color: white;
+    padding: 2rem 1rem;
     text-align: center;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-hover);
+    position: relative;
 }
 
+header .logo-container {
+    margin-bottom: 1.5rem;
+}
+
+header .logo {
+    max-width: 350px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+header h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+}
+
+header .tagline {
+    font-size: 1.1rem;
+    font-weight: 300;
+    opacity: 0.95;
+    margin: 0;
+}
+
+/* Navigation */
 nav {
-    background: var(--dark-gray);
-    padding: 0.75rem;
+    background: var(--card-bg);
+    padding: 1rem;
     text-align: center;
     box-shadow: var(--shadow);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 999;
+    border-bottom: 2px solid var(--border);
 }
 
 nav a {
-    color: var(--text-light);
+    color: var(--text);
     text-decoration: none;
-    margin: 0 1rem;
+    margin: 0 1.5rem;
     font-weight: 600;
-    transition: color 0.3s ease;
+    font-size: 0.95rem;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid transparent;
+    display: inline-block;
 }
 
 nav a:hover {
-    color: var(--secondary-blue);
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
 }
 
-section {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: var(--dark-gray);
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-blue);
+    font-weight: 700;
+    margin-bottom: 1rem;
 }
 
-h1, h2, h3 {
-    color: var(--secondary-blue);
+h1 {
+    font-size: 2.2rem;
 }
 
+h2 {
+    font-size: 1.8rem;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
 .btn {
     background: var(--accent-green);
-    color: var(--white);
-    padding: 1rem 2rem;
+    color: white;
+    padding: 0.9rem 2rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: background 0.3s ease, transform 0.3s ease;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--button-shadow);
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    min-width: 150px;
+    margin-top: 0.5rem;
 }
 
 .btn:hover {
     background: #1B5E20;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
 }
 
-.exhibition-box, .team-box {
+.btn:disabled {
+    background: #CCCCCC;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+}
+
+.btn-primary:hover {
+    background: #003fa3;
+}
+
+.btn-secondary {
+    background: var(--secondary-blue);
+}
+
+.btn-secondary:hover {
+    background: #3575c5;
+}
+
+/* Boxes */
+.exhibition-box, .team-box, .cta-box {
     background: var(--gradient-bg);
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 12px;
-    margin: 1rem 0;
-    box-shadow: var(--shadow);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-hover);
+    color: white;
     text-align: center;
-    color: var(--white);
 }
 
+.exhibition-box h3, .team-box h3, .cta-box h3 {
+    color: white;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+}
+
+.exhibition-box p, .team-box p, .cta-box p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Timeline */
 .timeline {
     position: relative;
     max-width: 1000px;
@@ -122,7 +250,7 @@ h1, h2, h3 {
     width: 25px;
     height: 25px;
     right: -17px;
-    background-color: var(--dark-gray);
+    background-color: var(--card-bg);
     border: 4px solid var(--timeline-color);
     top: 15px;
     border-radius: 50%;
@@ -143,25 +271,444 @@ h1, h2, h3 {
 
 .timeline-content {
     padding: 20px 30px;
-    background-color: var(--black-bg);
+    background-color: var(--card-bg);
     position: relative;
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-blue);
 }
 
-footer {
-    background: var(--primary-blue);
-    color: var(--white);
+/* Quiz */
+#topics, #options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+#topics button, #options label button {
+    flex: 1 1 200px;
+}
+
+.progress-bar {
+    background: var(--border);
+    height: 8px;
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: var(--secondary-blue);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+#result {
     text-align: center;
-    padding: 1rem;
-    margin-top: 2rem;
+}
+
+#emailInput {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+#emailInput input {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    width: 300px;
+    max-width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+#emailInput input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 82, 212, 0.1);
+}
+
+/* Footer */
+footer {
+    background: var(--gradient-bg);
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+}
+
+footer p {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Landing Page Hero */
+.hero {
+    min-height: 100vh;
+    background: var(--gradient-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.hero .logo {
+    max-width: 400px;
+    height: auto;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    animation: fadeInDown 1s ease-out;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.hero .typing-text {
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.typing-text::after {
+    content: '|';
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0;
+    }
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-primary-light {
+    background: white;
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+.btn-primary-light:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary-light {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+}
+
+.btn-secondary-light:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Features Section */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border-top: 4px solid var(--primary-blue);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.feature-card h3 {
+    color: var(--primary-blue);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    section {
+        padding: 1.5rem;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+    }
+
+    .hero .typing-text {
+        font-size: 1.5rem;
+    }
+
+    .hero .logo {
+        max-width: 300px;
+    }
+
+    header .logo {
+        max-width: 250px;
+    }
 }
 
 @media (max-width: 768px) {
-    section { padding: 1rem; }
-    nav a { display: block; margin: 0.5rem 0; }
-    .timeline::after { left: 31px; }
-    .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
-    .timeline-item::after { left: 15px; }
-    .right { left: 0%; }
+    section {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    nav {
+        padding: 0.75rem;
+    }
+
+    nav a {
+        display: block;
+        margin: 0.5rem 0;
+        font-size: 0.85rem;
+    }
+
+    header {
+        padding: 1.5rem 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    header .logo {
+        max-width: 150px;
+    }
+
+    .hero {
+        min-height: 80vh;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero .typing-text {
+        font-size: 1rem;
+        min-height: 1.5rem;
+    }
+
+    .hero .logo {
+        max-width: 200px;
+        margin-bottom: 0.8rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-large {
+        width: 100%;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
+
+    .timeline::after {
+        left: 31px;
+    }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 25px;
+    }
+
+    .timeline-item::after {
+        left: 15px;
+    }
+
+    .right {
+        left: 0%;
+    }
+
+    #topics, #options {
+        flex-direction: column;
+    }
+
+    #topics button, #options label button {
+        flex: 1 1 100%;
+    }
+
+    footer {
+        padding: 1rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    header .logo {
+        max-width: 100px;
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero .typing-text {
+        font-size: 0.9rem;
+    }
+
+    .hero .logo {
+        max-width: 150px;
+        margin-bottom: 0.5rem;
+    }
+
+    section {
+        padding: 0.75rem;
+        margin: 0.75rem auto;
+    }
+
+    nav a {
+        margin: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+
+    .btn-large {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    h3 {
+        font-size: 1rem;
+    }
+
+    .feature-card {
+        padding: 1rem;
+    }
+
+    .exhibition-box, .team-box, .cta-box {
+        padding: 1rem;
+    }
+
+    .exhibition-box h3, .team-box h3, .cta-box h3 {
+        font-size: 1.2rem;
+    }
+
+    #emailInput input {
+        width: 100%;
+    }
 }

@@ -8,6 +8,7 @@ const CONTRACT_ABI = [
     "function owner() view returns (address)"
 ];
 
+
 let provider, signer, contract, storachaClient;
 let currentTopic = '';
 let currentQuestions = [];
@@ -280,10 +281,107 @@ function shuffle(array) {
     return array;
 }
 
+// ========== CURSOR FOLLOWING DOTS EFFECT ==========
+function initCursorDots() {
+    if (window.innerWidth < 768) {
+        return; // Disable on mobile for performance
+    }
+
+    const dotColors = ['#0052D4', '#FFFFFF']; // Dark blue and white
+    let mouseX = 0, mouseY = 0;
+    let colorIndex = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        // Create a dot every few moves (throttle)
+        if (Math.random() > 0.7) {
+            createDot(mouseX, mouseY, dotColors[colorIndex % 2]);
+            colorIndex++;
+        }
+    });
+
+    function createDot(x, y, color) {
+        const dot = document.createElement('div');
+        dot.classList.add('cursor-dot');
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        dot.style.backgroundColor = color;
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.opacity = '0.8';
+        document.body.appendChild(dot);
+
+        // Fade out and remove
+        setTimeout(() => {
+            dot.style.opacity = '0';
+        }, 100);
+
+        setTimeout(() => {
+            dot.remove();
+        }, 400);
+    }
+}
+
+// ========== WALLET CONNECT SETUP ==========
+async function connectWallet() {
+    const selectedWallet = document.getElementById('walletSelect')?.value || 'metamask';
+
+    try {
+        if (selectedWallet === 'walletconnect') {
+            // WalletConnect integration would go here
+            // For now, we'll handle MetaMask
+            console.log('WalletConnect selected - implementation coming');
+        }
+
+        // MetaMask connection
+        if (typeof window.ethereum !== 'undefined') {
+            const accounts = await window.ethereum.request({
+                method: 'eth_requestAccounts'
+            });
+
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+            const userAddress = accounts[0];
+            localStorage.setItem('connectedWallet', userAddress);
+            localStorage.setItem('walletProvider', selectedWallet);
+
+            console.log('Wallet connected:', userAddress);
+
+            // Update UI to show connected state
+            const connectBtn = document.querySelector('[onclick*="connectWallet"]');
+            if (connectBtn) {
+                connectBtn.textContent = 'Wallet Connected ✓';
+                connectBtn.disabled = true;
+            }
+
+            return userAddress;
+        } else {
+            alert('Please install MetaMask or use WalletConnect');
+            return null;
+        }
+    } catch (error) {
+        console.error('Wallet connection error:', error);
+        alert('Failed to connect wallet: ' + error.message);
+        return null;
+    }
+}
+
+// Check if wallet is already connected
+function checkWalletConnection() {
+    const connectedWallet = localStorage.getItem('connectedWallet');
+    const provider = localStorage.getItem('walletProvider');
+    return { connectedWallet, provider };
+}
+
 // Load Storacha on script load
 loadStorachaClient().then(() => {
     console.log('app.js fully ready!');
     document.getElementById('loadStatus').textContent = 'Ready! Click Connect MetaMask.';
+    initCursorDots(); // Start cursor dots effect
 });
 
 // Navigation function

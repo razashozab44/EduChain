@@ -1,16 +1,18 @@
-<!-- Instructions Page: instructions.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instructions - STEMChain</title>
+    <title>Instructions - STEM Chain</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>STEMChain</h1>
-        <p>How to Get Started</p>
+        <div class="logo-container">
+            <img src="STEM-white.png" alt="STEM Chain Logo" class="logo">
+        </div>
+        <h1>Getting Started</h1>
+        <p class="tagline">How to Use STEM Chain</p>
     </header>
     <nav>
         <a href="index.html">Home</a>
@@ -21,35 +23,44 @@
         <a href="contact.html">Contact</a>
     </nav>
     <section>
-        <h2>Simple Steps to Join the Fun</h2>
-        <p>Getting set up is easy. Follow these to start quizzing and minting badges.</p>
+        <h2>Getting Started with STEM Chain</h2>
+        <p>Follow these simple steps to connect your wallet, take quizzes, and earn your first blockchain-verified badge!</p>
+        
         <div class="step">
-            <h3>Step 1: Get MetaMask</h3>
-            <p>Head to metamask.io and install the wallet. Make a new one and keep your secret phrase safe—it's like your key.</p>
+            <h3>📱 Step 1: Set Up Your Wallet</h3>
+            <p>Download <strong>MetaMask</strong> from <a href="https://metamask.io" target="_blank">metamask.io</a>. Create a new wallet and securely save your secret recovery phrase—this is your key to everything.</p>
         </div>
+        
         <div class="step">
-            <h3>Step 2: Add Base Sepolia Network</h3>
-            <p>In MetaMask, go to networks and add this one:</p>
+            <h3>🔗 Step 2: Add Base Sepolia Network</h3>
+            <p>In MetaMask, add the Base Sepolia test network with these details:</p>
             <ul>
-                <li>Name: Base Sepolia</li>
-                <li>RPC: https://sepolia.base.org</li>
-                <li>Chain ID: 84532</li>
-                <li>Symbol: ETH</li>
-                <li>Explorer: https://sepolia.basescan.org</li>
+                <li><strong>Network Name:</strong> Base Sepolia</li>
+                <li><strong>RPC URL:</strong> https://sepolia.base.org</li>
+                <li><strong>Chain ID:</strong> 84532</li>
+                <li><strong>Currency Symbol:</strong> ETH</li>
+                <li><strong>Block Explorer:</strong> https://sepolia.basescan.org</li>
             </ul>
         </div>
+        
         <div class="step">
-            <h3>Step 3: Grab Some Test ETH</h3>
-            <p>Go to the Coinbase faucet at portal.cdp.coinbase.com/products/faucet. Connect your wallet and claim free test ETH. Give it a minute to show up.</p>
+            <h3>💰 Step 3: Get Test ETH (Free!)</h3>
+            <p>Visit the <a href="https://portal.cdp.coinbase.com/products/faucet" target="_blank">Coinbase Faucet</a>, connect your MetaMask wallet, and claim free test ETH. This funds your quiz and badge minting!</p>
         </div>
+        
         <div class="step">
-            <h3>Step 4: Jump into a Quiz</h3>
-            <p>On the Quiz page, connect your wallet, pick a topic, answer the questions. Hit 80% or better, and mint your badge—it's that straightforward!</p>
+            <h3>🚀 Step 4: Take a Quiz & Earn Your Badge</h3>
+            <p>Head to the <a href="quiz.html">Quiz page</a>, connect your wallet, pick a STEM topic, and answer 10 questions. Score 80% or higher to unlock your blockchain badge!</p>
         </div>
-        <a href="quiz.html" class="btn">Go to Quiz</a>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="quiz.html" class="btn btn-primary">Go to Quiz</a>
+        </p>
     </section>
+    
     <footer>
-        <p>&copy; 2025 STEMChain | Powered by Base Chain for Real Learning Wins</p>
+        <p>&copy; 2025 STEM Chain | Powered by Base Chain • Making Learning Verifiable & Valuable</p>
     </footer>
+
 </body>
 </html>

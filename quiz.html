@@ -1,10 +1,9 @@
-<!-- Quiz Page: quiz.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz - STEMChain</title>
+    <title>Quiz - STEM Chain</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"></script>
@@ -13,8 +12,11 @@
 </head>
 <body>
     <header>
-        <h1>STEMChain</h1>
-        <p>Take the Challenge and Win Badges</p>
+        <div class="logo-container">
+            <img src="STEM-white.png" alt="STEM Chain Logo" class="logo">
+        </div>
+        <h1>STEM Quizzes</h1>
+        <p class="tagline">Take the Challenge and Win Badges</p>
     </header>
     <nav>
         <a href="index.html">Home</a>
@@ -27,8 +29,16 @@
     <section>
         <h2>Pick Your STEM Adventure</h2>
         <p>Choose a topic, answer 10 questions, and if you score 80% or more, mint a cool badge on Base Chain. It's fun and shows what you know!</p>
+        <p>If you're not sure how to get started, <a href="instructions.html">check out our instructions</a>.</p>
         <div id="walletInfo" class="hidden">
             Connected: <span id="address"></span> | Network: <span id="network"></span>
+        </div>
+        <div id="walletSelector" style="margin: 1.5rem 0; text-align: center;">
+            <label for="walletSelect" style="margin-right: 1rem; font-weight: 600;">Select Wallet:</label>
+            <select id="walletSelect" style="padding: 0.6rem; border-radius: 8px; border: 2px solid #0052D4; font-size: 1rem; cursor: pointer;">
+                <option value="metamask">MetaMask</option>
+                <option value="walletconnect">WalletConnect (Mobile)</option>
+            </select>
         </div>
         <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block;">Connect Wallet</button>
         <div id="topics" class="hidden">
