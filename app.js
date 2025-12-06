@@ -324,137 +324,157 @@ function initCursorDots() {
     }
 }
 
-// ========== UNIFIED WALLET CONNECTION (WalletConnect + MetaMask) ==========
-let wcModal = null;
-const projectId = '2f35b9dea29b453ee5258df53f727b1a';
+// ========== REOWN APPKIT SETUP (WalletConnect v2 - NEW API) ==========
+let appKit = null;
+const projectId = '2f35b9dea29b453ee5258df53f727b1a'; // Get from https://cloud.reown.com
 
-// Initialize WalletConnect Modal
-async function initWalletConnectModal() {
-    if (wcModal || typeof window.WalletConnectModal === 'undefined') {
-        console.log('WalletConnect Modal already initialized or not available');
-        return wcModal;
+// Define supported networks with proper configuration
+const supportedNetworks = [
+    {
+        chainId: 8453,
+        name: 'Base',
+        currency: 'ETH',
+        explorerUrl: 'https://basescan.org',
+        rpcUrl: 'https://8453.rpc.thirdweb.com'
+    },
+    {
+        chainId: 84532,
+        name: 'Base Sepolia',
+        currency: 'ETH',
+        explorerUrl: 'https://sepolia.basescan.org',
+        rpcUrl: 'https://84532.rpc.thirdweb.com'
+    }
+];
+
+// Initialize Reown AppKit
+async function initAppKit() {
+    if (appKit) {
+        console.log('AppKit already initialized');
+        return appKit;
     }
 
     try {
-        wcModal = new window.WalletConnectModal.WalletConnectModal({
+        // Check if Reown AppKit is available
+        if (typeof window.Reown === 'undefined' || !window.Reown.AppKit) {
+            console.error('Reown AppKit not loaded from CDN');
+            return null;
+        }
+
+        // Create metadata for your app
+        const metadata = {
+            name: 'STEM Chain',
+            description: 'Blockchain-verified STEM education badges',
+            url: window.location.origin,
+            icons: ['https://raw.githubusercontent.com/razashozab44/EduChain/master/STEM-white.png']
+        };
+
+        // Initialize AppKit with proper network configuration
+        appKit = new window.Reown.AppKit({
             projectId: projectId,
-            chains: [8453, 84532], // Base Mainnet and Base Sepolia
-            methods: ['eth_sendTransaction', 'eth_signMessage', 'eth_sign', 'personal_sign'],
-            events: ['chainChanged', 'accountsChanged'],
+            metadata: metadata,
+            networks: supportedNetworks,
+            defaultNetwork: 8453, // Base Mainnet as default
+            adapters: [new window.Reown.AppKitAdapter.EthersAdapter()]
         });
-        console.log('✓ WalletConnect Modal initialized');
-        return wcModal;
+
+        console.log('✓ Reown AppKit initialized successfully');
+        return appKit;
     } catch (error) {
-        console.error('Failed to initialize WalletConnect:', error);
+        console.error('Failed to initialize AppKit:', error);
         return null;
     }
 }
 
-// Main wallet connection function (uses WalletConnect for all wallets)
+// Connect wallet using AppKit
 async function connectWallet() {
     try {
-        // Initialize WalletConnect
-        const modal = await initWalletConnectModal();
-        
-        if (!modal) {
-            console.error('WalletConnect Modal not available');
-            alert('Connection failed. Please refresh and try again.');
+        // Initialize AppKit if not already done
+        const kit = await initAppKit();
+
+        if (!kit) {
+            alert('Connection system loading. Please refresh the page and try again.');
             return;
         }
 
-        console.log('Opening WalletConnect modal...');
-        
-        // Open the WalletConnect modal
-        await modal.openModal();
+        console.log('Opening AppKit modal...');
 
-        // Subscribe to modal state changes
-        const unsubscribe = modal.subscribeModal((state) => {
-            console.log('Modal state:', state);
-            
-            if (!state.open) {
-                unsubscribe();
+        // Open the AppKit modal - shows all supported wallets + QR for mobile
+        await kit.open();
+
+        // Listen for account changes
+        kit.subscribeAccount((state) => {
+            if (state?.address) {
+                console.log('Account changed:', state.address);
+                handleWalletConnected(state.address, 'appkit');
             }
         });
 
-        // Wait for wallet connection using the session
-        setTimeout(async () => {
-            try {
-                // Get the provider from WalletConnect
-                const provider = await createWalletConnectProvider();
-                
-                if (provider) {
-                    const accounts = await provider.request({ method: 'eth_accounts' });
-                    
-                    if (accounts && accounts.length > 0) {
-                        handleWalletConnected(accounts[0], 'walletconnect', provider);
-                    }
-                }
-            } catch (error) {
-                console.error('Error getting accounts:', error);
+        // Listen for network changes
+        kit.subscribeNetwork((state) => {
+            if (state) {
+                console.log('Network changed to:', state.chainId);
             }
-        }, 2000);
-
+        });
     } catch (error) {
         console.error('Wallet connection error:', error);
-        alert('Failed to open wallet connection: ' + error.message);
-    }
-}
-
-// Create WalletConnect provider
-async function createWalletConnectProvider() {
-    try {
-        // Use ethers.js to create a WalletConnect provider
-        const EthereumProvider = window.EthereumProvider || window.ethers.providers.Web3Provider;
-        
-        // For WalletConnect v2, we need to use the proper provider
-        // Using ethers.js with the Base RPC endpoint
-        const provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
-        return provider;
-    } catch (error) {
-        console.error('Error creating provider:', error);
-        return null;
+        alert('Failed to open wallet connection. Try refreshing the page: ' + error.message);
     }
 }
 
 // Unified wallet connection handler
-async function handleWalletConnected(userAddress, walletType, walletProvider = null) {
+async function handleWalletConnected(userAddress, walletType) {
     try {
-        // Set up provider and signer
-        if (walletType === 'walletconnect' && walletProvider) {
-            provider = walletProvider;
-            signer = provider.getSigner ? provider.getSigner() : null;
-        } else if (typeof window.ethereum !== 'undefined') {
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-        } else {
+        if (!userAddress) {
+            console.error('No user address provided');
+            return;
+        }
+
+        // Get provider and signer
+        let provider;
+        let signer;
+
+        if (walletType === 'appkit' && appKit) {
+            try {
+                // Try to get provider from AppKit
+                provider = appKit.getProvider?.();
+                signer = provider?.getSigner?.();
+            } catch (e) {
+                console.warn('Could not get AppKit provider, using fallback');
+            }
+        }
+
+        // Fallback provider if AppKit provider not available
+        if (!provider) {
             provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
             signer = null;
         }
 
-        // Set up contract (read-only if no signer)
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer || provider);
+        // Set up global variables and contract
+        window.provider = provider;
+        window.signer = signer;
+        window.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer || provider);
 
         // Store connection info
         localStorage.setItem('connectedWallet', userAddress);
         localStorage.setItem('walletProvider', walletType);
         localStorage.setItem('connectionTime', new Date().toISOString());
 
-        console.log('✅ Wallet connected:', userAddress, `via ${walletType}`);
+        const shortAddress = userAddress.substring(0, 6) + '...' + userAddress.substring(userAddress.length - 4);
+        console.log('✅ Wallet connected:', shortAddress, `(${walletType})`);
 
-        // Update UI
+        // Update UI - show quiz topics
         const topicsDiv = document.getElementById('topics');
         const connectBtn = document.getElementById('connectBtn');
-        const walletSelector = document.getElementById('walletSelector');
 
         if (topicsDiv) topicsDiv.classList.remove('hidden');
         if (connectBtn) connectBtn.style.display = 'none';
-        if (walletSelector) walletSelector.style.display = 'none';
 
         // Show success message
         const statusEl = document.getElementById('loadStatus');
         if (statusEl) {
-            statusEl.textContent = `✓ Connected: ${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+            statusEl.textContent = `✓ Connected: ${shortAddress}`;
             statusEl.style.color = '#2E7D32';
+            statusEl.style.fontWeight = 'bold';
         }
 
         return userAddress;
@@ -471,6 +491,23 @@ function checkWalletConnection() {
     const walletProvider = localStorage.getItem('walletProvider');
     const connectionTime = localStorage.getItem('connectionTime');
     return { connectedWallet, walletProvider, connectionTime };
+}
+
+// Disconnect wallet
+async function disconnectWallet() {
+    try {
+        if (appKit && appKit.disconnect) {
+            await appKit.disconnect();
+        }
+        localStorage.removeItem('connectedWallet');
+        localStorage.removeItem('walletProvider');
+        localStorage.removeItem('connectionTime');
+        
+        console.log('✓ Wallet disconnected');
+        location.reload();
+    } catch (error) {
+        console.error('Disconnect error:', error);
+    }
 }
 
 // Load Storacha on script load
