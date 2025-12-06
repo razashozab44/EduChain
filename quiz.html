@@ -34,14 +34,7 @@
         <div id="walletInfo" class="hidden">
             Connected: <span id="address"></span> | Network: <span id="network"></span>
         </div>
-        <div id="walletSelector" style="margin: 1.5rem 0; text-align: center;">
-            <label for="walletSelect" style="margin-right: 1rem; font-weight: 600;">Select Wallet:</label>
-            <select id="walletSelect" style="padding: 0.6rem; border-radius: 8px; border: 2px solid #0052D4; font-size: 1rem; cursor: pointer;">
-                <option value="metamask">MetaMask</option>
-                <option value="walletconnect">WalletConnect (Mobile)</option>
-            </select>
-        </div>
-        <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block;">Connect Wallet</button>
+        <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block; margin: 1.5rem 0;">Connect Wallet (MetaMask, Trust Wallet, etc.)</button>
         <div id="topics" class="hidden">
             <button class="btn" onclick="startQuiz('physics')">Physics</button>
             <button class="btn" onclick="startQuiz('chemistry')">Chemistry</button>

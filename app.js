@@ -324,115 +324,144 @@ function initCursorDots() {
     }
 }
 
-// ========== WALLETCONNECT WEB SDK SETUP ==========
+// ========== UNIFIED WALLET CONNECTION (WalletConnect + MetaMask) ==========
 let wcModal = null;
-const projectId = '2f35b9dea29b453ee5258df53f727b1a'; // Get from https://cloud.walletconnect.com
+const projectId = '2f35b9dea29b453ee5258df53f727b1a';
 
 // Initialize WalletConnect Modal
 async function initWalletConnectModal() {
     if (wcModal || typeof window.WalletConnectModal === 'undefined') {
-        return;
+        console.log('WalletConnect Modal already initialized or not available');
+        return wcModal;
     }
 
-    wcModal = new window.WalletConnectModal.WalletConnectModal({
-        projectId: projectId,
-        chains: [8453, 84532], // Base Mainnet and Base Sepolia
-        methods: ['eth_sendTransaction', 'eth_signMessage', 'eth_sign', 'personal_sign'],
-        events: ['chainChanged', 'accountsChanged'],
-        explorerRecommendedWalletIds: ['c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'], // MetaMask
-    });
+    try {
+        wcModal = new window.WalletConnectModal.WalletConnectModal({
+            projectId: projectId,
+            chains: [8453, 84532], // Base Mainnet and Base Sepolia
+            methods: ['eth_sendTransaction', 'eth_signMessage', 'eth_sign', 'personal_sign'],
+            events: ['chainChanged', 'accountsChanged'],
+        });
+        console.log('✓ WalletConnect Modal initialized');
+        return wcModal;
+    } catch (error) {
+        console.error('Failed to initialize WalletConnect:', error);
+        return null;
+    }
 }
 
-// Connect via WalletConnect
-async function connectWalletConnect() {
+// Main wallet connection function (uses WalletConnect for all wallets)
+async function connectWallet() {
     try {
-        if (!wcModal) {
-            await initWalletConnectModal();
-        }
-
-        if (!wcModal) {
-            alert('WalletConnect not available. Please try MetaMask.');
+        // Initialize WalletConnect
+        const modal = await initWalletConnectModal();
+        
+        if (!modal) {
+            console.error('WalletConnect Modal not available');
+            alert('Connection failed. Please refresh and try again.');
             return;
         }
 
-        // Open WalletConnect modal - shows QR code and wallet options
-        wcModal.openModal();
+        console.log('Opening WalletConnect modal...');
+        
+        // Open the WalletConnect modal
+        await modal.openModal();
 
-        // Listen for session changes
-        wcModal.subscribeModal((state) => {
-            if (!state.open && state.data?.session) {
-                const session = state.data.session;
-                if (session.accounts && session.accounts.length > 0) {
-                    const userAddress = session.accounts[0];
-                    handleWalletConnected(userAddress, 'walletconnect');
-                }
+        // Subscribe to modal state changes
+        const unsubscribe = modal.subscribeModal((state) => {
+            console.log('Modal state:', state);
+            
+            if (!state.open) {
+                unsubscribe();
             }
         });
+
+        // Wait for wallet connection using the session
+        setTimeout(async () => {
+            try {
+                // Get the provider from WalletConnect
+                const provider = await createWalletConnectProvider();
+                
+                if (provider) {
+                    const accounts = await provider.request({ method: 'eth_accounts' });
+                    
+                    if (accounts && accounts.length > 0) {
+                        handleWalletConnected(accounts[0], 'walletconnect', provider);
+                    }
+                }
+            } catch (error) {
+                console.error('Error getting accounts:', error);
+            }
+        }, 2000);
+
     } catch (error) {
-        console.error('WalletConnect error:', error);
-        alert('WalletConnect connection failed. Try MetaMask instead.');
+        console.error('Wallet connection error:', error);
+        alert('Failed to open wallet connection: ' + error.message);
     }
 }
 
-// Connect via MetaMask
-async function connectMetaMask() {
+// Create WalletConnect provider
+async function createWalletConnectProvider() {
     try {
-        if (typeof window.ethereum === 'undefined') {
-            alert('Please install MetaMask extension');
-            return null;
-        }
-
-        const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts'
-        });
-
-        if (accounts && accounts.length > 0) {
-            handleWalletConnected(accounts[0], 'metamask');
-            return accounts[0];
-        }
+        // Use ethers.js to create a WalletConnect provider
+        const EthereumProvider = window.EthereumProvider || window.ethers.providers.Web3Provider;
+        
+        // For WalletConnect v2, we need to use the proper provider
+        // Using ethers.js with the Base RPC endpoint
+        const provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
+        return provider;
     } catch (error) {
-        console.error('MetaMask connection error:', error);
-        alert('MetaMask connection failed: ' + error.message);
+        console.error('Error creating provider:', error);
         return null;
     }
 }
 
 // Unified wallet connection handler
-async function handleWalletConnected(userAddress, walletType) {
+async function handleWalletConnected(userAddress, walletType, walletProvider = null) {
     try {
-        if (walletType === 'metamask') {
+        // Set up provider and signer
+        if (walletType === 'walletconnect' && walletProvider) {
+            provider = walletProvider;
+            signer = provider.getSigner ? provider.getSigner() : null;
+        } else if (typeof window.ethereum !== 'undefined') {
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
-        } else if (walletType === 'walletconnect') {
-            // Use Base chain RPC for WalletConnect
+        } else {
             provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
+            signer = null;
         }
 
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        // Set up contract (read-only if no signer)
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer || provider);
 
+        // Store connection info
         localStorage.setItem('connectedWallet', userAddress);
         localStorage.setItem('walletProvider', walletType);
+        localStorage.setItem('connectionTime', new Date().toISOString());
 
-        console.log('✓ Wallet connected:', userAddress, `(${walletType})`);
+        console.log('✅ Wallet connected:', userAddress, `via ${walletType}`);
 
         // Update UI
-        document.getElementById('topics').classList.remove('hidden');
-        document.getElementById('connectBtn').style.display = 'none';
-        document.getElementById('walletSelector').style.display = 'none';
+        const topicsDiv = document.getElementById('topics');
+        const connectBtn = document.getElementById('connectBtn');
+        const walletSelector = document.getElementById('walletSelector');
+
+        if (topicsDiv) topicsDiv.classList.remove('hidden');
+        if (connectBtn) connectBtn.style.display = 'none';
+        if (walletSelector) walletSelector.style.display = 'none';
+
+        // Show success message
+        const statusEl = document.getElementById('loadStatus');
+        if (statusEl) {
+            statusEl.textContent = `✓ Connected: ${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+            statusEl.style.color = '#2E7D32';
+        }
+
+        return userAddress;
     } catch (error) {
         console.error('Wallet connection error:', error);
         alert('Connection setup failed: ' + error.message);
-    }
-}
-
-// Main connect function
-async function connectWallet() {
-    const selectedWallet = document.getElementById('walletSelect')?.value || 'metamask';
-
-    if (selectedWallet === 'walletconnect') {
-        await connectWalletConnect();
-    } else {
-        await connectMetaMask();
+        return null;
     }
 }
 
@@ -440,7 +469,8 @@ async function connectWallet() {
 function checkWalletConnection() {
     const connectedWallet = localStorage.getItem('connectedWallet');
     const walletProvider = localStorage.getItem('walletProvider');
-    return { connectedWallet, walletProvider };
+    const connectionTime = localStorage.getItem('connectionTime');
+    return { connectedWallet, walletProvider, connectionTime };
 }
 
 // Load Storacha on script load
