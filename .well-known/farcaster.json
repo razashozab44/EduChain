@@ -12,25 +12,25 @@
   },
   "miniapp": {
     "version": "1",
-    "name": "Crypto Portfolio Tracker",
+    "name": "STEM Chain",
     "homeUrl": "https://stemchain.vercel.app/",
-    "iconUrl": "https://ex.co/i.png",
+    "iconUrl": "https://stemchain.vercel.app/STEM_Badge_Logo.png",
     "splashImageUrl": "https://ex.co/l.png",
     "splashBackgroundColor": "#000000",
-    "subtitle": "Easy to manage",
-    "description": "Track and manage your cryptocurrency portfolio.",
+    "subtitle": "Blockchain-based STEM Education Badges",
+    "description": "Earn verifiable STEM badges on the Base Chain blockchain.",
     "screenshotUrls": [
-      "https://ex.co/s1.png",
-      "https://ex.co/s2.png",
-      "https://ex.co/s3.png"
+      "https://stemchain.vercel.app/STEM_Badge_Logo.png",
+      "https://stemchain.vercel.app/STEM.png",
+      "https://stemchain.vercel.app/STEM-white.png"
     ],
-    "primaryCategory": "finance",
-    "tags": ["finance"],
-    "heroImageUrl": "https://ex.co/og.png",
-    "tagline": "Save instantly",
-    "ogTitle": "Example Mini App",
-    "ogDescription": "Easy to manage portfolio.",
-    "ogImageUrl": "https://ex.co/og.png",
+    "primaryCategory": "Education",
+    "tags": ["Education", "Blockchain", "STEM", "Badges"],
+    "heroImageUrl": "https://stemchain.vercel.app/STEM_Badge_Logo.png",
+    "tagline": "Verify STEM Learning on Blockchain",
+    "ogTitle": "Take Quizes on STEM Chain",
+    "ogDescription": "Start Learning and get certified with Blockchain-based STEM Badges!",
+    "ogImageUrl": "https://stemchain.vercel.app/STEM_Badge_Logo.png",
     "noindex": true
   }
 }
