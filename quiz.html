@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Quiz - STEM Chain</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"> <!-- Fixed: Changed to link for CSS -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Update quiz.html head with these scripts (add after your existing ones) -->
-<script src="https://unpkg.com/@reown/appkit@latest/dist/appkit.js"></script>
-<script src="https://unpkg.com/@reown/appkit-adapter-ethers@latest/dist/index.js"></script>
-<script src="https://unpkg.com/@reown/appkit/networks@latest/dist/index.js"></script>
+    <!-- Reown AppKit CDNs -->
+    <script src="https://unpkg.com/@reown/appkit@latest/dist/appkit.js"></script>
+    <script src="https://unpkg.com/@reown/appkit-adapter-ethers@latest/dist/index.js"></script>
+    <script src="https://unpkg.com/@reown/appkit/networks@latest/dist/index.js"></script>
 </head>
 <body>
     <header>
@@ -36,7 +36,7 @@
         <div id="walletInfo" class="hidden">
             Connected: <span id="address"></span> | Network: <span id="network"></span>
         </div>
-        <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()" style="display: block; width: 100%; margin: 1.5rem 0;">Connect Wallet (MetaMask)</button>
+        <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()" style="display: block; width: 100%; margin: 1.5rem 0;">Connect Wallet </button>
        
         <div id="topics" class="hidden">
             <button class="btn btn-primary" onclick="startQuiz('physics')">⚛️ Physics</button>

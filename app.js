@@ -1,7 +1,3 @@
-import { createAppKit } from "@reown/appkit";
-import { Ethers5Adapter } from "@reown/appkit-adapter-ethers5";
-import { mainnet, arbitrum, baseSepolia } from "@reown/appkit/networks";
-
 // 1. Get projectId at https://dashboard.reown.com
 const projectId = "2f35b9dea29b453ee5258df53f727b1a";
 
@@ -13,11 +9,11 @@ const metadata = {
   icons: ["https://avatars.mywebsite.com/"],
 };
 
-// 3. Create a AppKit instance
-const modal = createAppKit({
-  adapters: [new Ethers5Adapter()],
+// 3. Create a AppKit instance using global window.Reown
+const modal = window.Reown.AppKit.createAppKit({
+  adapters: [new window.Reown.AppKit.Ethers5Adapter()],
   metadata: metadata,
-  networks: [mainnet, arbitrum, baseSepolia],
+  networks: [window.Reown.AppKit.networks.mainnet, window.Reown.AppKit.networks.arbitrum, window.Reown.AppKit.networks.baseSepolia],
   projectId,
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
@@ -96,143 +92,89 @@ async function loadStorachaClient() {
     }
 }
 
-/ Reown AppKit initialization for multi-wallet support
-let appKit;
+// Reown AppKit initialization
+let appKit = null;
+let appKitInitialized = false;
+
 async function initAppKit() {
-    if (appKit) return;
+    if (appKitInitialized) return appKit;
+    
     try {
-        const { createAppKit } = window.Reown;
+        console.log('Initializing Reown AppKit...');
         const { baseSepolia } = window.Reown.AppKit.networks;
 
-        appKit = createAppKit({
-            adapters: [window.Reown.AppKit.adapters.ethers],
+        appKit = window.Reown.AppKit.createAppKit({
+            adapters: [new window.Reown.AppKit.Ethers5Adapter()],
+            metadata: metadata,
             networks: [baseSepolia],
-            projectId: '2f35b9dea29b453ee5258df53f727b1a',
-            metadata: {
-                name: 'STEMChain',
-                description: 'STEM quizzes with blockchain badges',
-                url: window.location.origin,
-                icons: ['https://your-icon-url.png'] // Add your logo URL
-            },
+            projectId,
             features: {
-                analytics: false,
-                email: false,
-                socials: false
+                analytics: true,
             },
-            themeVariables: {
-                '--w3m-color-mix': '#0052D4',
-                '--w3m-color-mix-strength': 20
-            }
         });
-        console.log('Reown AppKit initialized');
+        appKitInitialized = true;
+        console.log('✓ Reown AppKit initialized successfully');
+        return appKit;
     } catch (error) {
         console.error('Failed to init AppKit:', error);
-        alert('Wallet system loading failed. Please refresh.');
+        alert('Wallet system loading failed. Please refresh and try again.');
+        return null;
     }
 }
 
-// Connect wallet using Reown AppKit (supports all wallets)
+// Connect wallet using Reown AppKit
 async function connectWallet() {
-    await initAppKit();
-    if (!appKit) return;
-
     try {
-        await appKit.open();
+        const kit = await initAppKit();
+        if (!kit) {
+            alert('Wallet system not ready. Please refresh the page.');
+            return;
+        }
+
+        console.log('Opening wallet modal...');
+        await kit.open();
         
-        // Subscribe to account changes
-        appKit.subscribeState(async (state) => {
+        // Subscribe to state changes
+        const unsubscribe = kit.subscribeState(async (state) => {
+            console.log('State changed:', state);
             if (state.isConnected) {
                 const address = state.address;
                 const chainId = state.chainId;
                 
+                console.log('Connected - Address:', address, 'ChainId:', chainId);
+                
                 if (chainId !== 84532) {
-                    alert('Please switch to Base Sepolia in your wallet.');
+                    alert('Please switch to Base Sepolia (Chain ID: 84532) in your wallet.');
                     return;
                 }
                 
-                // Get Ethers provider and signer
-                const appKitProvider = await appKit.getProvider();
-                provider = new ethers.providers.Web3Provider(appKitProvider);
-                signer = provider.getSigner();
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                
-                document.getElementById('address').textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
-                document.getElementById('network').textContent = 'Base Sepolia';
-                document.getElementById('walletInfo').classList.remove('hidden');
-                document.getElementById('connectBtn').style.display = 'none';
-                document.getElementById('topics').classList.remove('hidden');
+                try {
+                    // Get Ethers provider and signer
+                    const appKitProvider = await kit.getProvider();
+                    provider = new ethers.providers.Web3Provider(appKitProvider);
+                    signer = provider.getSigner();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    // Update UI
+                    const shortAddress = `${address.slice(0,6)}...${address.slice(-4)}`;
+                    document.getElementById('address').textContent = shortAddress;
+                    document.getElementById('network').textContent = 'Base Sepolia';
+                    document.getElementById('walletInfo').classList.remove('hidden');
+                    document.getElementById('connectBtn').style.display = 'none';
+                    document.getElementById('topics').classList.remove('hidden');
+                    
+                    console.log('✓ Wallet connected successfully:', shortAddress);
+                } catch (error) {
+                    console.error('Error setting up provider/signer:', error);
+                    alert('Error connecting wallet: ' + error.message);
+                }
             }
         });
     } catch (error) {
         console.error('Connection error:', error);
-        alert('Connection failed: ' + error.message);
+        alert('Failed to open wallet: ' + error.message);
     }
 }
-
-
-// MetaMask-only connection with auto-switch to Base Sepolia
-async function connectWallet() {
-    console.log('connectWallet called! Ethereum:', window.ethereum);
-    if (typeof ethers === 'undefined') return alert('Ethers not loaded!');
-    if (typeof window.ethereum === 'undefined') return alert('MetaMask not detected! Install/unlock.');
-
-    try {
-        // Request accounts
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        
-        // Auto-switch to Base Sepolia (chainId 84532)
-        const chainId = '0xAA36A7'; // 84532 in hex
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId }]
-            });
-        } catch (switchError) {
-            if (switchError.code === 4902) { // Chain not added
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: chainId,
-                        chainName: 'Base Sepolia',
-                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                        rpcUrls: ['https://sepolia.base.org'],
-                        blockExplorerUrls: ['https://sepolia.basescan.org']
-                    }]
-                });
-            } else {
-                throw switchError;
-            }
-        }
-
-        // Create provider and signer
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-        const address = await signer.getAddress();
-        const network = await provider.getNetwork();
-        console.log('Connected! Address:', address, 'Chain ID:', network.chainId.toString());
-        
-        if (network.chainId !== 84532) {
-            alert(`Switch to Base Sepolia (84532). Current: ${network.chainId.toString()}`);
-            return;
-        }
-
-        document.getElementById('address').textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
-        document.getElementById('network').textContent = 'Base Sepolia';
-        document.getElementById('walletInfo').classList.remove('hidden');
-        document.getElementById('connectBtn').style.display = 'none';
-        document.getElementById('topics').classList.remove('hidden');
-        document.getElementById('debug').classList.add('hidden');
-
-        const owner = await contract.owner();
-        if (owner.toLowerCase() !== address.toLowerCase()) console.warn('Not owner — make mint public.');
-    } catch (error) {
-        console.error('Connection error:', error);
-        alert('Connection failed: ' + error.message + '. Check Console (F12).');
-    }
-}
-
 function startQuiz(topic) {
     console.log('Quiz started! Topic:', topic);
     if (!contract) return alert('Connect wallet first!');
