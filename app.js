@@ -1,3 +1,29 @@
+import { createAppKit } from "@reown/appkit";
+import { Ethers5Adapter } from "@reown/appkit-adapter-ethers5";
+import { mainnet, arbitrum, baseSepolia } from "@reown/appkit/networks";
+
+// 1. Get projectId at https://dashboard.reown.com
+const projectId = "2f35b9dea29b453ee5258df53f727b1a";
+
+// 2. Create your application's metadata object
+const metadata = {
+  name: "STEM Chain",
+  description: "My Website description",
+  url: "https://stemchain.netlify.com", // url must match your domain & subdomain
+  icons: ["https://avatars.mywebsite.com/"],
+};
+
+// 3. Create a AppKit instance
+const modal = createAppKit({
+  adapters: [new Ethers5Adapter()],
+  metadata: metadata,
+  networks: [mainnet, arbitrum, baseSepolia],
+  projectId,
+  features: {
+    analytics: true, // Optional - defaults to your Cloud configuration
+  },
+});
+
 // REPLACE with your Remix-deployed contract address
 const CONTRACT_ADDRESS = '0x739de26e6847f38ff967485357b155a39bed085e';
 
@@ -69,6 +95,80 @@ async function loadStorachaClient() {
         console.error('Storacha load failed:', error);
     }
 }
+
+/ Reown AppKit initialization for multi-wallet support
+let appKit;
+async function initAppKit() {
+    if (appKit) return;
+    try {
+        const { createAppKit } = window.Reown;
+        const { baseSepolia } = window.Reown.AppKit.networks;
+
+        appKit = createAppKit({
+            adapters: [window.Reown.AppKit.adapters.ethers],
+            networks: [baseSepolia],
+            projectId: '2f35b9dea29b453ee5258df53f727b1a',
+            metadata: {
+                name: 'STEMChain',
+                description: 'STEM quizzes with blockchain badges',
+                url: window.location.origin,
+                icons: ['https://your-icon-url.png'] // Add your logo URL
+            },
+            features: {
+                analytics: false,
+                email: false,
+                socials: false
+            },
+            themeVariables: {
+                '--w3m-color-mix': '#0052D4',
+                '--w3m-color-mix-strength': 20
+            }
+        });
+        console.log('Reown AppKit initialized');
+    } catch (error) {
+        console.error('Failed to init AppKit:', error);
+        alert('Wallet system loading failed. Please refresh.');
+    }
+}
+
+// Connect wallet using Reown AppKit (supports all wallets)
+async function connectWallet() {
+    await initAppKit();
+    if (!appKit) return;
+
+    try {
+        await appKit.open();
+        
+        // Subscribe to account changes
+        appKit.subscribeState(async (state) => {
+            if (state.isConnected) {
+                const address = state.address;
+                const chainId = state.chainId;
+                
+                if (chainId !== 84532) {
+                    alert('Please switch to Base Sepolia in your wallet.');
+                    return;
+                }
+                
+                // Get Ethers provider and signer
+                const appKitProvider = await appKit.getProvider();
+                provider = new ethers.providers.Web3Provider(appKitProvider);
+                signer = provider.getSigner();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                
+                document.getElementById('address').textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
+                document.getElementById('network').textContent = 'Base Sepolia';
+                document.getElementById('walletInfo').classList.remove('hidden');
+                document.getElementById('connectBtn').style.display = 'none';
+                document.getElementById('topics').classList.remove('hidden');
+            }
+        });
+    } catch (error) {
+        console.error('Connection error:', error);
+        alert('Connection failed: ' + error.message);
+    }
+}
+
 
 // MetaMask-only connection with auto-switch to Base Sepolia
 async function connectWallet() {
@@ -321,3 +421,5 @@ function showPage(id) {
 
 // Initial load
 showPage('home');
+
+

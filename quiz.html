@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Quiz - STEM Chain</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Reown AppKit - Official Wallet Connection SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@reown/appkit@latest/dist/index.umd.js"></script>
-    <!-- Reown AppKit Adapter for ethers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-ethers@latest/dist/index.umd.js"></script>
+    <!-- Update quiz.html head with these scripts (add after your existing ones) -->
+<script src="https://unpkg.com/@reown/appkit@latest/dist/appkit.js"></script>
+<script src="https://unpkg.com/@reown/appkit-adapter-ethers@latest/dist/index.js"></script>
+<script src="https://unpkg.com/@reown/appkit/networks@latest/dist/index.js"></script>
 </head>
 <body>
     <header>
@@ -36,42 +36,34 @@
         <div id="walletInfo" class="hidden">
             Connected: <span id="address"></span> | Network: <span id="network"></span>
         </div>
-        <button id="connectBtn" class="btn" onclick="connectWallet()" style="display: block; margin: 1.5rem 0;">Connect Wallet (MetaMask, Trust Wallet, etc.)</button>
+        <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()" style="display: block; width: 100%; margin: 1.5rem 0;">Connect Wallet (MetaMask)</button>
+       
         <div id="topics" class="hidden">
-            <button class="btn" onclick="startQuiz('physics')">Physics</button>
-            <button class="btn" onclick="startQuiz('chemistry')">Chemistry</button>
-            <button class="btn" onclick="startQuiz('biologyEnv')">Biology & Environment</button>
+            <button class="btn btn-primary" onclick="startQuiz('physics')">⚛️ Physics</button>
+            <button class="btn btn-primary" onclick="startQuiz('chemistry')">🧪 Chemistry</button>
+            <button class="btn btn-primary" onclick="startQuiz('biologyEnv')">🌱 Biology & Environment</button>
         </div>
         <div id="quiz-container" class="hidden">
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
-            <h3 id="question"></h3>
+            <h3 id="question" style="margin-top: 1.5rem; word-wrap: break-word;"></h3>
             <div id="options"></div>
-            <button id="nextBtn" class="btn" onclick="advanceQuestion()" disabled>Next</button>
+            <button id="nextBtn" class="btn btn-secondary" onclick="advanceQuestion()" disabled style="width: 100%; margin-top: 1.5rem;">Next Question</button>
         </div>
         <div id="result" class="hidden">
             <h2>Your Score</h2>
-            <p>Score: <span id="score"></span>/10</p>
-            <p id="message"></p>
-            <div id="badgePreview" class="hidden"></div>
+            <p style="font-size: 1.2rem; margin: 1rem 0;">Score: <span id="score" style="font-weight: bold; color: var(--primary-blue);">0</span>/10</p>
+            <p id="message" style="font-size: 1.1rem; font-weight: 600; margin: 1rem 0;"></p>
+            <div id="badgePreview" class="hidden" style="margin: 2rem 0; display: flex; justify-content: center;"></div>
             <div id="emailInput">
                 <p>Enter your Storacha email to upload:</p>
                 <input type="email" id="userEmail" placeholder="your@email.com">
-                <button class="btn" onclick="validateEmail()">Validate & Mint</button>
+                <button class="btn btn-primary" onclick="validateEmail()" style="width: 100%;">Validate & Mint</button>
             </div>
-            <button id="claimBtn" class="btn" onclick="claimNFT()" disabled>Mint Your Badge</button>
-            <button class="btn" onclick="restart()">Try Again</button>
-            <p id="txStatus"></p>
-        </div>
-        <div id="wcModal" style="display: none;">
-            <div>
-                <h3>Mobile Connect</h3>
-                <p>Scan with MetaMask:</p>
-                <div id="qrCode"></div>
-                <button class="btn" onclick="connectWalletConnect()">Connect</button>
-                <button class="btn" onclick="closeModal()">Close</button>
-            </div>
+            <button id="claimBtn" class="btn btn-secondary" onclick="claimNFT()" disabled style="width: 100%;">Mint Your Badge</button>
+            <button class="btn btn-primary" onclick="restart()" style="width: 100%;">Try Again</button>
+            <p id="txStatus" style="margin-top: 1rem; font-weight: 600;"></p>
         </div>
     </section>
     <footer>

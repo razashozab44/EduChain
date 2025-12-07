@@ -35,6 +35,8 @@
 
 html, body {
     scroll-behavior: smooth;
+    width: 100%;
+    height: 100%;
 }
 
 body {
@@ -99,30 +101,33 @@ header .tagline {
 /* Navigation */
 nav {
     background: var(--card-bg);
-    padding: 1rem;
-    text-align: center;
+    padding: 0.5rem 0.75rem;
     box-shadow: var(--shadow);
     position: sticky;
     top: 0;
     z-index: 999;
     border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 nav a {
     color: var(--text);
     text-decoration: none;
-    margin: 0 1.5rem;
+    padding: 0.5rem 1rem;
     font-weight: 600;
-    font-size: 0.95rem;
-    transition: color 0.3s ease, border-bottom 0.3s ease;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid transparent;
+    font-size: 0.9rem;
+    transition: color 0.3s ease, background 0.3s ease;
+    border-radius: 6px;
     display: inline-block;
+    white-space: nowrap;
 }
 
 nav a:hover {
     color: var(--primary-blue);
-    border-bottom-color: var(--primary-blue);
+    background: rgba(0, 82, 212, 0.1);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -152,7 +157,7 @@ p {
 .btn {
     background: var(--accent-green);
     color: white;
-    padding: 0.9rem 2rem;
+    padding: 1rem 2rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -163,14 +168,20 @@ p {
     display: inline-block;
     text-decoration: none;
     text-align: center;
-    min-width: 150px;
-    margin-top: 0.5rem;
+    min-width: auto;
+    margin: 0.5rem auto;
+    width: auto;
+    max-width: 100%;
 }
 
 .btn:hover {
     background: #1B5E20;
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+}
+
+.btn:active {
+    transform: translateY(-1px);
 }
 
 .btn:disabled {
@@ -284,18 +295,43 @@ p {
     flex-wrap: wrap;
     gap: 1rem;
     justify-content: center;
+    width: 100%;
+    margin: 1rem 0;
 }
 
-#topics button, #options label button {
+#topics button, #options label {
     flex: 1 1 200px;
+    min-width: 150px;
+    display: block;
+}
+
+#options label {
+    text-align: left;
+    padding: 0.75rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#options label:hover {
+    border-color: var(--primary-blue);
+    background: rgba(0, 82, 212, 0.05);
+}
+
+#options label input[type="radio"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
 }
 
 .progress-bar {
     background: var(--border);
     height: 8px;
     border-radius: 4px;
-    margin: 1rem 0;
+    margin: 1.5rem 0;
     overflow: hidden;
+    width: 100%;
 }
 
 .progress-fill {
@@ -306,6 +342,7 @@ p {
 
 #result {
     text-align: center;
+    padding: 2rem 1rem;
 }
 
 #emailInput {
@@ -313,23 +350,31 @@ p {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    margin: 1.5rem 0;
 }
 
 #emailInput input {
     padding: 0.75rem;
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     border-radius: 8px;
     background: var(--card-bg);
     color: var(--text);
-    width: 300px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 400px;
     transition: border-color 0.3s ease;
+    font-size: 1rem;
 }
 
 #emailInput input:focus {
     outline: none;
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(0, 82, 212, 0.1);
+}
+
+section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
 }
 
 /* Footer */
@@ -356,6 +401,8 @@ footer p {
     color: white;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    padding: 1rem;
 }
 
 .hero::before {
@@ -374,15 +421,17 @@ footer p {
     position: relative;
     z-index: 2;
     max-width: 800px;
-    padding: 2rem;
+    padding: 2rem 1rem;
+    width: 100%;
 }
 
 .hero .logo {
     max-width: 400px;
     height: auto;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     animation: fadeInDown 1s ease-out;
+    width: 100%;
 }
 
 .hero h1 {
@@ -392,6 +441,7 @@ footer p {
     margin-bottom: 1rem;
     line-height: 1.2;
     animation: fadeInUp 1s ease-out 0.2s both;
+    word-wrap: break-word;
 }
 
 .hero .typing-text {
@@ -401,6 +451,7 @@ footer p {
     margin-bottom: 1.5rem;
     font-weight: 300;
     animation: fadeInUp 1s ease-out 0.4s both;
+    word-wrap: break-word;
 }
 
 .typing-text::after {
@@ -423,6 +474,7 @@ footer p {
     justify-content: center;
     flex-wrap: wrap;
     animation: fadeInUp 1s ease-out 0.6s both;
+    width: 100%;
 }
 
 .btn-large {
@@ -432,6 +484,9 @@ footer p {
     text-decoration: none;
     transition: all 0.3s ease;
     display: inline-block;
+    min-width: 150px;
+    flex-grow: 1;
+    max-width: 100%;
 }
 
 .btn-primary-light {
@@ -533,26 +588,40 @@ footer p {
     header .logo {
         max-width: 250px;
     }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 70px;
+    }
+
+    .timeline::after {
+        left: 31px;
+    }
+
+    .right {
+        left: 0%;
+    }
 }
 
 @media (max-width: 768px) {
     section {
-        padding: 1rem;
-        margin: 1rem auto;
+        padding: 1.5rem 1rem;
+        margin: 0;
     }
 
     nav {
-        padding: 0.75rem;
+        padding: 0.5rem;
+        gap: 0.3rem;
     }
 
     nav a {
-        display: block;
-        margin: 0.5rem 0;
-        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        margin: 0;
+        font-size: 0.8rem;
     }
 
     header {
-        padding: 1.5rem 0.5rem;
+        padding: 1rem 0.5rem;
     }
 
     header h1 {
@@ -560,11 +629,16 @@ footer p {
     }
 
     header .logo {
-        max-width: 150px;
+        max-width: 120px;
     }
 
     .hero {
-        min-height: 80vh;
+        min-height: 85vh;
+        padding: 1rem;
+    }
+
+    .hero-content {
+        padding: 1.5rem 1rem;
     }
 
     .hero h1 {
@@ -577,19 +651,22 @@ footer p {
     }
 
     .hero .logo {
-        max-width: 200px;
+        max-width: 180px;
         margin-bottom: 0.8rem;
     }
 
     .hero-buttons {
         flex-direction: column;
         gap: 0.75rem;
+        width: 100%;
     }
 
     .btn-large {
         width: 100%;
-        padding: 0.8rem 1.5rem;
+        padding: 0.9rem 1.5rem;
         font-size: 0.95rem;
+        min-width: unset;
+        flex-grow: unset;
     }
 
     h1 {
@@ -633,82 +710,235 @@ footer p {
 
     #topics, #options {
         flex-direction: column;
+        gap: 0.75rem;
     }
 
-    #topics button, #options label button {
+    #topics button, #options label {
         flex: 1 1 100%;
+        width: 100%;
+    }
+
+    #options label {
+        margin-bottom: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.9rem 1.5rem;
+        font-size: 0.95rem;
+        width: 100%;
+        min-width: unset;
+        margin: 0.5rem 0;
     }
 
     footer {
-        padding: 1rem 0.5rem;
+        padding: 1rem;
         font-size: 0.85rem;
+    }
+
+    .exhibition-box, .team-box, .cta-box {
+        padding: 1.5rem;
+    }
+
+    .exhibition-box h3, .team-box h3, .cta-box h3 {
+        font-size: 1.3rem;
+    }
+
+    #emailInput {
+        width: 100%;
+    }
+
+    #emailInput input {
+        width: 100%;
+    }
+
+    #walletInfo {
+        padding: 1rem;
+        background: rgba(0, 82, 212, 0.05);
+        border-radius: 8px;
+        margin: 1rem 0;
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
-    header h1 {
-        font-size: 1.2rem;
-    }
-
-    header .logo {
-        max-width: 100px;
-    }
-
-    .hero h1 {
-        font-size: 1.5rem;
-    }
-
-    .hero .typing-text {
-        font-size: 0.9rem;
-    }
-
-    .hero .logo {
-        max-width: 150px;
-        margin-bottom: 0.5rem;
+    html, body {
+        font-size: 14px;
     }
 
     section {
-        padding: 0.75rem;
-        margin: 0.75rem auto;
+        padding: 1rem;
+    }
+
+    nav {
+        padding: 0.3rem;
+        gap: 0.2rem;
     }
 
     nav a {
-        margin: 0.25rem;
-        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        margin: 0.1rem;
     }
 
-    .btn {
-        padding: 0.7rem 1rem;
-        font-size: 0.9rem;
-        min-width: 120px;
+    header {
+        padding: 0.8rem 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.1rem;
+    }
+
+    header .logo {
+        max-width: 80px;
+    }
+
+    .hero {
+        min-height: 100vh;
+        padding: 0.5rem;
+    }
+
+    .hero-content {
+        padding: 1rem 0.5rem;
+    }
+
+    .hero h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero .typing-text {
+        font-size: 0.85rem;
+        min-height: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero .logo {
+        max-width: 120px;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
     }
 
     .btn-large {
-        padding: 0.7rem 1.2rem;
-        font-size: 0.9rem;
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.2rem;
+        font-size: 0.85rem;
+        width: 100%;
+        margin: 0.4rem 0;
+        min-width: unset;
+    }
+
+    h1 {
+        font-size: 1.4rem;
     }
 
     h2 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
 
     h3 {
-        font-size: 1rem;
+        font-size: 0.95rem;
+    }
+
+    p {
+        font-size: 0.9rem;
     }
 
     .feature-card {
         padding: 1rem;
     }
 
+    .feature-card h3 {
+        font-size: 1rem;
+    }
+
     .exhibition-box, .team-box, .cta-box {
         padding: 1rem;
+        margin: 1rem 0;
     }
 
     .exhibition-box h3, .team-box h3, .cta-box h3 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+    }
+
+    .exhibition-box p, .team-box p, .cta-box p {
+        font-size: 0.85rem;
     }
 
     #emailInput input {
         width: 100%;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    #topics button, #options label {
+        width: 100%;
+    }
+
+    .timeline-item {
+        padding-left: 60px;
+    }
+
+    .progress-bar {
+        margin: 1rem 0;
+    }
+
+    footer {
+        padding: 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    #walletInfo {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    nav a {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    header h1 {
+        font-size: 0.95rem;
+    }
+
+    header .logo {
+        max-width: 60px;
+    }
+
+    .hero h1 {
+        font-size: 1.2rem;
+    }
+
+    .hero .typing-text {
+        font-size: 0.75rem;
+    }
+
+    .hero .logo {
+        max-width: 100px;
+    }
+
+    .btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+    }
+
+    h3 {
+        font-size: 0.85rem;
     }
 }
