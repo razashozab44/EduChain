@@ -8,7 +8,6 @@ const CONTRACT_ABI = [
     "function owner() view returns (address)"
 ];
 
-
 let provider, signer, contract, storachaClient;
 let currentTopic = '';
 let currentQuestions = [];
@@ -71,17 +70,43 @@ async function loadStorachaClient() {
     }
 }
 
-// All functions defined
+// MetaMask-only connection with auto-switch to Base Sepolia
 async function connectWallet() {
     console.log('connectWallet called! Ethereum:', window.ethereum);
     if (typeof ethers === 'undefined') return alert('Ethers not loaded!');
     if (typeof window.ethereum === 'undefined') return alert('MetaMask not detected! Install/unlock.');
+
     try {
+        // Request accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        
+        // Auto-switch to Base Sepolia (chainId 84532)
+        const chainId = '0xAA36A7'; // 84532 in hex
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId }]
+            });
+        } catch (switchError) {
+            if (switchError.code === 4902) { // Chain not added
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: chainId,
+                        chainName: 'Base Sepolia',
+                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                        rpcUrls: ['https://sepolia.base.org'],
+                        blockExplorerUrls: ['https://sepolia.basescan.org']
+                    }]
+                });
+            } else {
+                throw switchError;
+            }
+        }
+
+        // Create provider and signer
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        console.log('Provider created');
-        await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        console.log('Signer ready');
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
         const address = await signer.getAddress();
@@ -281,240 +306,10 @@ function shuffle(array) {
     return array;
 }
 
-// ========== CURSOR FOLLOWING DOTS EFFECT ==========
-function initCursorDots() {
-    if (window.innerWidth < 768) {
-        return; // Disable on mobile for performance
-    }
-
-    const dotColors = ['#0052D4', '#FFFFFF']; // Dark blue and white
-    let mouseX = 0, mouseY = 0;
-    let colorIndex = 0;
-
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        // Create a dot every few moves (throttle)
-        if (Math.random() > 0.7) {
-            createDot(mouseX, mouseY, dotColors[colorIndex % 2]);
-            colorIndex++;
-        }
-    });
-
-    function createDot(x, y, color) {
-        const dot = document.createElement('div');
-        dot.classList.add('cursor-dot');
-        dot.style.left = x + 'px';
-        dot.style.top = y + 'px';
-        dot.style.backgroundColor = color;
-        dot.style.width = '8px';
-        dot.style.height = '8px';
-        dot.style.opacity = '0.8';
-        document.body.appendChild(dot);
-
-        // Fade out and remove
-        setTimeout(() => {
-            dot.style.opacity = '0';
-        }, 100);
-
-        setTimeout(() => {
-            dot.remove();
-        }, 400);
-    }
-}
-
-// ========== REOWN APPKIT SETUP (WalletConnect v2 - NEW API) ==========
-let appKit = null;
-const projectId = '2f35b9dea29b453ee5258df53f727b1a'; // Get from https://cloud.reown.com
-
-// Define supported networks with proper configuration
-const supportedNetworks = [
-    {
-        chainId: 8453,
-        name: 'Base',
-        currency: 'ETH',
-        explorerUrl: 'https://basescan.org',
-        rpcUrl: 'https://8453.rpc.thirdweb.com'
-    },
-    {
-        chainId: 84532,
-        name: 'Base Sepolia',
-        currency: 'ETH',
-        explorerUrl: 'https://sepolia.basescan.org',
-        rpcUrl: 'https://84532.rpc.thirdweb.com'
-    }
-];
-
-// Initialize Reown AppKit
-async function initAppKit() {
-    if (appKit) {
-        console.log('AppKit already initialized');
-        return appKit;
-    }
-
-    try {
-        // Check if Reown AppKit is available
-        if (typeof window.Reown === 'undefined' || !window.Reown.AppKit) {
-            console.error('Reown AppKit not loaded from CDN');
-            return null;
-        }
-
-        // Create metadata for your app
-        const metadata = {
-            name: 'STEM Chain',
-            description: 'Blockchain-verified STEM education badges',
-            url: window.location.origin,
-            icons: ['https://raw.githubusercontent.com/razashozab44/EduChain/master/STEM-white.png']
-        };
-
-        // Initialize AppKit with proper network configuration
-        appKit = new window.Reown.AppKit({
-            projectId: projectId,
-            metadata: metadata,
-            networks: supportedNetworks,
-            defaultNetwork: 8453, // Base Mainnet as default
-            adapters: [new window.Reown.AppKitAdapter.EthersAdapter()]
-        });
-
-        console.log('✓ Reown AppKit initialized successfully');
-        return appKit;
-    } catch (error) {
-        console.error('Failed to initialize AppKit:', error);
-        return null;
-    }
-}
-
-// Connect wallet using AppKit
-async function connectWallet() {
-    try {
-        // Initialize AppKit if not already done
-        const kit = await initAppKit();
-
-        if (!kit) {
-            alert('Connection system loading. Please refresh the page and try again.');
-            return;
-        }
-
-        console.log('Opening AppKit modal...');
-
-        // Open the AppKit modal - shows all supported wallets + QR for mobile
-        await kit.open();
-
-        // Listen for account changes
-        kit.subscribeAccount((state) => {
-            if (state?.address) {
-                console.log('Account changed:', state.address);
-                handleWalletConnected(state.address, 'appkit');
-            }
-        });
-
-        // Listen for network changes
-        kit.subscribeNetwork((state) => {
-            if (state) {
-                console.log('Network changed to:', state.chainId);
-            }
-        });
-    } catch (error) {
-        console.error('Wallet connection error:', error);
-        alert('Failed to open wallet connection. Try refreshing the page: ' + error.message);
-    }
-}
-
-// Unified wallet connection handler
-async function handleWalletConnected(userAddress, walletType) {
-    try {
-        if (!userAddress) {
-            console.error('No user address provided');
-            return;
-        }
-
-        // Get provider and signer
-        let provider;
-        let signer;
-
-        if (walletType === 'appkit' && appKit) {
-            try {
-                // Try to get provider from AppKit
-                provider = appKit.getProvider?.();
-                signer = provider?.getSigner?.();
-            } catch (e) {
-                console.warn('Could not get AppKit provider, using fallback');
-            }
-        }
-
-        // Fallback provider if AppKit provider not available
-        if (!provider) {
-            provider = new ethers.providers.JsonRpcProvider('https://8453.rpc.thirdweb.com');
-            signer = null;
-        }
-
-        // Set up global variables and contract
-        window.provider = provider;
-        window.signer = signer;
-        window.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer || provider);
-
-        // Store connection info
-        localStorage.setItem('connectedWallet', userAddress);
-        localStorage.setItem('walletProvider', walletType);
-        localStorage.setItem('connectionTime', new Date().toISOString());
-
-        const shortAddress = userAddress.substring(0, 6) + '...' + userAddress.substring(userAddress.length - 4);
-        console.log('✅ Wallet connected:', shortAddress, `(${walletType})`);
-
-        // Update UI - show quiz topics
-        const topicsDiv = document.getElementById('topics');
-        const connectBtn = document.getElementById('connectBtn');
-
-        if (topicsDiv) topicsDiv.classList.remove('hidden');
-        if (connectBtn) connectBtn.style.display = 'none';
-
-        // Show success message
-        const statusEl = document.getElementById('loadStatus');
-        if (statusEl) {
-            statusEl.textContent = `✓ Connected: ${shortAddress}`;
-            statusEl.style.color = '#2E7D32';
-            statusEl.style.fontWeight = 'bold';
-        }
-
-        return userAddress;
-    } catch (error) {
-        console.error('Wallet connection error:', error);
-        alert('Connection setup failed: ' + error.message);
-        return null;
-    }
-}
-
-// Check if wallet is already connected
-function checkWalletConnection() {
-    const connectedWallet = localStorage.getItem('connectedWallet');
-    const walletProvider = localStorage.getItem('walletProvider');
-    const connectionTime = localStorage.getItem('connectionTime');
-    return { connectedWallet, walletProvider, connectionTime };
-}
-
-// Disconnect wallet
-async function disconnectWallet() {
-    try {
-        if (appKit && appKit.disconnect) {
-            await appKit.disconnect();
-        }
-        localStorage.removeItem('connectedWallet');
-        localStorage.removeItem('walletProvider');
-        localStorage.removeItem('connectionTime');
-        
-        console.log('✓ Wallet disconnected');
-        location.reload();
-    } catch (error) {
-        console.error('Disconnect error:', error);
-    }
-}
-
 // Load Storacha on script load
 loadStorachaClient().then(() => {
     console.log('app.js fully ready!');
     document.getElementById('loadStatus').textContent = 'Ready! Click Connect MetaMask.';
-    initCursorDots(); // Start cursor dots effect
 });
 
 // Navigation function
