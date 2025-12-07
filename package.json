@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@farcaster/miniapp-sdk": "^0.2.1",
     "@reown/appkit": "^1.8.14",
     "@reown/appkit-adapter-ethers5": "^1.8.14",
     "@reown/walletkit": "^1.4.1",

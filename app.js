@@ -1,3 +1,8 @@
+import { sdk } from '@farcaster/miniapp-sdk';
+
+// Once app is ready to be displayed
+await sdk.actions.ready();
+
 // Project configuration
 const projectId = "2f35b9dea29b453ee5258df53f727b1a";
 
