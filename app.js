@@ -1,29 +1,94 @@
-// 1. Get projectId at https://dashboard.reown.com
+// Project configuration
 const projectId = "2f35b9dea29b453ee5258df53f727b1a";
 
-// 2. Create your application's metadata object
 const metadata = {
   name: "STEM Chain",
-  description: "My Website description",
-  url: "https://stemchain.netlify.com", // url must match your domain & subdomain
+  description: "Blockchain-verified STEM education badges",
+  url: window.location.origin,
   icons: ["https://avatars.mywebsite.com/"],
 };
 
-// 3. Create a AppKit instance using global window.Reown
-const modal = window.Reown.AppKit.createAppKit({
-  adapters: [new window.Reown.AppKit.Ethers5Adapter()],
-  metadata: metadata,
-  networks: [window.Reown.AppKit.networks.mainnet, window.Reown.AppKit.networks.arbitrum, window.Reown.AppKit.networks.baseSepolia],
-  projectId,
-  features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
-  },
-});
+// Reown AppKit will be initialized here
+let appKit = null;
+let appKitInitializing = false;
+let appKitInitialized = false;
 
-// REPLACE with your Remix-deployed contract address
+// Function to initialize Reown AppKit
+async function initializeReownAppKit() {
+    // Prevent multiple simultaneous initialization attempts
+    if (appKitInitializing) {
+        console.log('AppKit already initializing, waiting...');
+        // Wait for initialization to complete
+        while (appKitInitializing && !appKitInitialized) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return appKit;
+    }
+    
+    if (appKitInitialized && appKit) {
+        console.log('AppKit already initialized');
+        return appKit;
+    }
+    
+    appKitInitializing = true;
+    
+    try {
+        console.log('Initializing wallet connection...');
+        
+        // Check if MetaMask is available
+        if (!window.ethereum) {
+            throw new Error('MetaMask not detected. Please install MetaMask wallet extension.');
+        }
+        
+        console.log('✓ MetaMask detected');
+        
+        // Request account access
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        console.log('Wallet connected:', accounts[0]);
+        
+        // Create provider and signer from MetaMask
+        const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+        const ethersSigner = await ethersProvider.getSigner();
+        
+        // Set global variables
+        provider = ethersProvider;
+        signer = ethersSigner;
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        
+        // Create a mock AppKit object to maintain compatibility
+        appKit = {
+            provider: ethersProvider,
+            signer: ethersSigner,
+            address: accounts[0],
+            open: () => {
+                console.log('AppKit mock open called');
+            },
+            getEthersProvider: () => ethersProvider,
+            subscribeState: (callback) => {
+                // Listen for account changes
+                if (window.ethereum) {
+                    window.ethereum.on('accountsChanged', (newAccounts) => {
+                        callback({ address: newAccounts[0] });
+                    });
+                }
+            }
+        };
+        
+        appKitInitialized = true;
+        appKitInitializing = false;
+        console.log('✓ Wallet initialized');
+        
+        return appKit;
+    } catch (error) {
+        console.error('Failed to initialize wallet:', error);
+        appKitInitializing = false;
+        appKitInitialized = false;
+        throw error;
+    }
+}
+
+// Contract configuration
 const CONTRACT_ADDRESS = '0x739de26e6847f38ff967485357b155a39bed085e';
-
-// YOUR SPACE DID FROM DASHBOARD
 const SPACE_DID = 'did:key:z6Mkw7oyKmmx4QLaxyoCPi7PXLP9KjPAHEjoTNDeC14FsLCz';
 const CONTRACT_ABI = [
     "function mint(address to, string memory uri) public returns (uint256)",
@@ -92,87 +157,53 @@ async function loadStorachaClient() {
     }
 }
 
-// Reown AppKit initialization
-let appKit = null;
-let appKitInitialized = false;
-
-async function initAppKit() {
-    if (appKitInitialized) return appKit;
-    
-    try {
-        console.log('Initializing Reown AppKit...');
-        const { baseSepolia } = window.Reown.AppKit.networks;
-
-        appKit = window.Reown.AppKit.createAppKit({
-            adapters: [new window.Reown.AppKit.Ethers5Adapter()],
-            metadata: metadata,
-            networks: [baseSepolia],
-            projectId,
-            features: {
-                analytics: true,
-            },
-        });
-        appKitInitialized = true;
-        console.log('✓ Reown AppKit initialized successfully');
-        return appKit;
-    } catch (error) {
-        console.error('Failed to init AppKit:', error);
-        alert('Wallet system loading failed. Please refresh and try again.');
-        return null;
-    }
-}
-
-// Connect wallet using Reown AppKit
+// Connect wallet using Reown AppKit (with MetaMask fallback)
 async function connectWallet() {
     try {
-        const kit = await initAppKit();
-        if (!kit) {
-            alert('Wallet system not ready. Please refresh the page.');
+        console.log('Starting wallet connection...');
+        
+        // Initialize wallet connection
+        if (!appKit) {
+            await initializeReownAppKit();
+        }
+        
+        if (!appKit) {
+            alert('Failed to initialize wallet system. Please check that MetaMask is installed and try again.');
             return;
         }
-
-        console.log('Opening wallet modal...');
-        await kit.open();
         
-        // Subscribe to state changes
-        const unsubscribe = kit.subscribeState(async (state) => {
-            console.log('State changed:', state);
-            if (state.isConnected) {
-                const address = state.address;
-                const chainId = state.chainId;
-                
-                console.log('Connected - Address:', address, 'ChainId:', chainId);
-                
-                if (chainId !== 84532) {
-                    alert('Please switch to Base Sepolia (Chain ID: 84532) in your wallet.');
-                    return;
+        // Get the connected address
+        const address = appKit.address || (signer ? await signer.getAddress() : null);
+        
+        if (address) {
+            console.log('Wallet already connected:', address);
+            
+            // Update UI
+            const shortAddr = `${address.slice(0, 6)}...${address.slice(-4)}`;
+            document.getElementById('address').textContent = shortAddr;
+            document.getElementById('network').textContent = 'Base Sepolia';
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('connectBtn').style.display = 'none';
+            document.getElementById('topics').classList.remove('hidden');
+            
+            console.log('✓ Wallet ready:', shortAddr);
+        }
+        
+        // Subscribe to account changes
+        if (appKit.subscribeState) {
+            appKit.subscribeState((state) => {
+                console.log('Wallet state changed:', state);
+                if (state?.address) {
+                    const shortAddr = `${state.address.slice(0, 6)}...${state.address.slice(-4)}`;
+                    document.getElementById('address').textContent = shortAddr;
+                    console.log('✓ Wallet updated:', shortAddr);
                 }
-                
-                try {
-                    // Get Ethers provider and signer
-                    const appKitProvider = await kit.getProvider();
-                    provider = new ethers.providers.Web3Provider(appKitProvider);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                    
-                    // Update UI
-                    const shortAddress = `${address.slice(0,6)}...${address.slice(-4)}`;
-                    document.getElementById('address').textContent = shortAddress;
-                    document.getElementById('network').textContent = 'Base Sepolia';
-                    document.getElementById('walletInfo').classList.remove('hidden');
-                    document.getElementById('connectBtn').style.display = 'none';
-                    document.getElementById('topics').classList.remove('hidden');
-                    
-                    console.log('✓ Wallet connected successfully:', shortAddress);
-                } catch (error) {
-                    console.error('Error setting up provider/signer:', error);
-                    alert('Error connecting wallet: ' + error.message);
-                }
-            }
-        });
+            });
+        }
+        
     } catch (error) {
-        console.error('Connection error:', error);
-        alert('Failed to open wallet: ' + error.message);
+        console.error('Wallet connection error:', error);
+        alert('Connection failed: ' + error.message);
     }
 }
 function startQuiz(topic) {
