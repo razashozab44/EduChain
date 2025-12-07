@@ -12,7 +12,7 @@
     "version": "1",
     "name": "STEM Chain",
     "homeUrl": "https://stemchain.vercel.app/",
-    "iconUrl": "https://stemchain.vercel.app/STEM_Badge_Logo.png",
+    "iconUrl": "https://stemchain.vercel.app/STEM.png",
     "splashImageUrl": "https://ex.co/l.png",
     "splashBackgroundColor": "#000000",
     "subtitle": "Blockchain-based STEM Education Badges",
