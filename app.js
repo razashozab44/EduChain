@@ -13,6 +13,31 @@ let appKit = null;
 let appKitInitializing = false;
 let appKitInitialized = false;
 
+// Detect if running on mobile
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Function to detect MetaMask on mobile
+function detectMetaMask() {
+    // Desktop and modern mobile (in-app browser)
+    if (window.ethereum) {
+        return window.ethereum;
+    }
+    
+    // For mobile browsers, MetaMask might be available through different paths
+    if (window.ethereum?.isMetaMask) {
+        return window.ethereum;
+    }
+    
+    // Check for other common providers
+    if (window.web3?.currentProvider) {
+        return window.web3.currentProvider;
+    }
+    
+    return null;
+}
+
 // Function to initialize Reown AppKit
 async function initializeReownAppKit() {
     // Prevent multiple simultaneous initialization attempts
@@ -34,20 +59,35 @@ async function initializeReownAppKit() {
     
     try {
         console.log('Initializing wallet connection...');
+        console.log('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
         
-        // Check if MetaMask is available
-        if (!window.ethereum) {
-            throw new Error('MetaMask not detected. Please install MetaMask wallet extension.');
+        // Detect MetaMask provider
+        const ethereumProvider = detectMetaMask();
+        
+        if (!ethereumProvider) {
+            console.error('MetaMask not found. Checking available providers...');
+            
+            if (isMobileDevice()) {
+                throw new Error(
+                    'MetaMask not detected on mobile. Please:\n' +
+                    '1. Open MetaMask app\n' +
+                    '2. Go to Menu > Browser\n' +
+                    '3. Visit this site from the MetaMask browser\n' +
+                    '4. Then click "Connect Wallet" again'
+                );
+            } else {
+                throw new Error('MetaMask not detected. Please install MetaMask extension and refresh the page.');
+            }
         }
         
         console.log('✓ MetaMask detected');
         
         // Request account access
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await ethereumProvider.request({ method: 'eth_requestAccounts' });
         console.log('Wallet connected:', accounts[0]);
         
         // Create provider and signer from MetaMask
-        const ethersProvider = new ethers.BrowserProvider(window.ethereum);
+        const ethersProvider = new ethers.BrowserProvider(ethereumProvider);
         const ethersSigner = await ethersProvider.getSigner();
         
         // Set global variables
@@ -66,9 +106,12 @@ async function initializeReownAppKit() {
             getEthersProvider: () => ethersProvider,
             subscribeState: (callback) => {
                 // Listen for account changes
-                if (window.ethereum) {
-                    window.ethereum.on('accountsChanged', (newAccounts) => {
+                if (ethereumProvider) {
+                    ethereumProvider.on('accountsChanged', (newAccounts) => {
                         callback({ address: newAccounts[0] });
+                    });
+                    ethereumProvider.on('chainChanged', (chainId) => {
+                        console.log('Network changed to:', chainId);
                     });
                 }
             }
@@ -164,7 +207,34 @@ async function connectWallet() {
         
         // Initialize wallet connection
         if (!appKit) {
-            await initializeReownAppKit();
+            try {
+                await initializeReownAppKit();
+            } catch (error) {
+                console.error('Wallet initialization error:', error);
+                
+                // Special handling for mobile
+                if (isMobileDevice()) {
+                    const currentUrl = window.location.href;
+                    const deepLink = `https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}`;
+                    
+                    const userChoice = confirm(
+                        error.message + 
+                        '\n\nWould you like to open MetaMask app now? (Click OK to open, Cancel to try again)'
+                    );
+                    
+                    if (userChoice) {
+                        // Try to open MetaMask with deep link
+                        window.location.href = deepLink;
+                        return;
+                    } else {
+                        alert('Please ensure you are using MetaMask app browser. Then click Connect Wallet again.');
+                        return;
+                    }
+                } else {
+                    alert(error.message);
+                    return;
+                }
+            }
         }
         
         if (!appKit) {
