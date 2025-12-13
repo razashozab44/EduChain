@@ -1,138 +1,7 @@
-import { sdk } from '@farcaster/miniapp-sdk';
-// Project configuration
-const projectId = "2f35b9dea29b453ee5258df53f727b1a";
-
-const metadata = {
-  name: "STEM Chain",
-  description: "Blockchain-verified STEM education badges",
-  url: window.location.origin,
-  icons: ["https://avatars.mywebsite.com/"],
-};
-
-// Reown AppKit will be initialized here
-let appKit = null;
-let appKitInitializing = false;
-let appKitInitialized = false;
-
-// Detect if running on mobile
-function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Function to detect MetaMask on mobile
-function detectMetaMask() {
-    // Desktop and modern mobile (in-app browser)
-    if (window.ethereum) {
-        return window.ethereum;
-    }
-    
-    // For mobile browsers, MetaMask might be available through different paths
-    if (window.ethereum?.isMetaMask) {
-        return window.ethereum;
-    }
-    
-    // Check for other common providers
-    if (window.web3?.currentProvider) {
-        return window.web3.currentProvider;
-    }
-    
-    return null;
-}
-
-// Function to initialize Reown AppKit
-async function initializeReownAppKit() {
-    // Prevent multiple simultaneous initialization attempts
-    if (appKitInitializing) {
-        console.log('AppKit already initializing, waiting...');
-        // Wait for initialization to complete
-        while (appKitInitializing && !appKitInitialized) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        return appKit;
-    }
-    
-    if (appKitInitialized && appKit) {
-        console.log('AppKit already initialized');
-        return appKit;
-    }
-    
-    appKitInitializing = true;
-    
-    try {
-        console.log('Initializing wallet connection...');
-        console.log('Device type:', isMobileDevice() ? 'Mobile' : 'Desktop');
-        
-        // Detect MetaMask provider
-        const ethereumProvider = detectMetaMask();
-        
-        if (!ethereumProvider) {
-            console.error('MetaMask not found. Checking available providers...');
-            
-            if (isMobileDevice()) {
-                throw new Error(
-                    'MetaMask not detected on mobile. Please:\n' +
-                    '1. Open MetaMask app\n' +
-                    '2. Go to Menu > Browser\n' +
-                    '3. Visit this site from the MetaMask browser\n' +
-                    '4. Then click "Connect Wallet" again'
-                );
-            } else {
-                throw new Error('MetaMask not detected. Please install MetaMask extension and refresh the page.');
-            }
-        }
-        
-        console.log('✓ MetaMask detected');
-        
-        // Request account access
-        const accounts = await ethereumProvider.request({ method: 'eth_requestAccounts' });
-        console.log('Wallet connected:', accounts[0]);
-        
-        // Create provider and signer from MetaMask
-        const ethersProvider = new ethers.BrowserProvider(ethereumProvider);
-        const ethersSigner = await ethersProvider.getSigner();
-        
-        // Set global variables
-        provider = ethersProvider;
-        signer = ethersSigner;
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        
-        // Create a mock AppKit object to maintain compatibility
-        appKit = {
-            provider: ethersProvider,
-            signer: ethersSigner,
-            address: accounts[0],
-            open: () => {
-                console.log('AppKit mock open called');
-            },
-            getEthersProvider: () => ethersProvider,
-            subscribeState: (callback) => {
-                // Listen for account changes
-                if (ethereumProvider) {
-                    ethereumProvider.on('accountsChanged', (newAccounts) => {
-                        callback({ address: newAccounts[0] });
-                    });
-                    ethereumProvider.on('chainChanged', (chainId) => {
-                        console.log('Network changed to:', chainId);
-                    });
-                }
-            }
-        };
-        
-        appKitInitialized = true;
-        appKitInitializing = false;
-        console.log('✓ Wallet initialized');
-        
-        return appKit;
-    } catch (error) {
-        console.error('Failed to initialize wallet:', error);
-        appKitInitializing = false;
-        appKitInitialized = false;
-        throw error;
-    }
-}
-
-// Contract configuration
+// REPLACE with your Remix-deployed contract address
 const CONTRACT_ADDRESS = '0x739de26e6847f38ff967485357b155a39bed085e';
+
+// YOUR SPACE DID FROM DASHBOARD
 const SPACE_DID = 'did:key:z6Mkw7oyKmmx4QLaxyoCPi7PXLP9KjPAHEjoTNDeC14FsLCz';
 const CONTRACT_ABI = [
     "function mint(address to, string memory uri) public returns (uint256)",
@@ -147,7 +16,7 @@ let score = 0;
 let difficultyLevel = 'easy';
 let userAnswers = [];
 
-// 30 MCQs - FULL ARRAY
+// 30 MCQs - FULL ARRAY (unchanged - keep your full list)
 const questions = {
   physics: [
     { question: "What type of energy is stored in a stretched rubber band?", options: ["Potential energy", "Kinetic energy", "Thermal energy", "Chemical energy"], correct: 0, difficulty: "easy" },
@@ -201,82 +70,78 @@ async function loadStorachaClient() {
     }
 }
 
-// Connect wallet using Reown AppKit (with MetaMask fallback)
+// Simple MetaMask connection with auto-switch to Base Sepolia (Ethers v6 compatible)
 async function connectWallet() {
+    if (typeof window.ethereum === 'undefined') {
+        alert('MetaMask not detected! Please install MetaMask and refresh.');
+        return;
+    }
+
     try {
-        console.log('Starting wallet connection...');
-        
-        // Initialize wallet connection
-        if (!appKit) {
-            try {
-                await initializeReownAppKit();
-            } catch (error) {
-                console.error('Wallet initialization error:', error);
-                
-                // Special handling for mobile
-                if (isMobileDevice()) {
-                    const currentUrl = window.location.href;
-                    const deepLink = `https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}`;
-                    
-                    const userChoice = confirm(
-                        error.message + 
-                        '\n\nWould you like to open MetaMask app now? (Click OK to open, Cancel to try again)'
-                    );
-                    
-                    if (userChoice) {
-                        // Try to open MetaMask with deep link
-                        window.location.href = deepLink;
-                        return;
-                    } else {
-                        alert('Please ensure you are using MetaMask app browser. Then click Connect Wallet again.');
-                        return;
-                    }
-                } else {
-                    alert(error.message);
-                    return;
-                }
+        // Request accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const chainIdHex = '0xAA36A7'; // Base Sepolia = 84532
+
+        // Try to switch network
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: chainIdHex }]
+            });
+        } catch (switchError) {
+            // If chain not added, add it
+            if (switchError.code === 4902) {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: chainIdHex,
+                        chainName: 'Base Sepolia',
+                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                        rpcUrls: ['https://sepolia.base.org'],
+                        blockExplorerUrls: ['https://sepolia.basescan.org']
+                    }]
+                });
+            } else {
+                throw switchError;
             }
         }
-        
-        if (!appKit) {
-            alert('Failed to initialize wallet system. Please check that MetaMask is installed and try again.');
+
+        // Ethers v6: Use BrowserProvider
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        const address = await signer.getAddress();
+        const network = await provider.getNetwork();
+
+        if (network.chainId !== 84532n) {
+            alert(`Please switch to Base Sepolia. Current chain: ${network.chainId}`);
             return;
         }
-        
-        // Get the connected address
-        const address = appKit.address || (signer ? await signer.getAddress() : null);
-        
-        if (address) {
-            console.log('Wallet already connected:', address);
-            
-            // Update UI
-            const shortAddr = `${address.slice(0, 6)}...${address.slice(-4)}`;
-            document.getElementById('address').textContent = shortAddr;
-            document.getElementById('network').textContent = 'Base Sepolia';
-            document.getElementById('walletInfo').classList.remove('hidden');
-            document.getElementById('connectBtn').style.display = 'none';
-            document.getElementById('topics').classList.remove('hidden');
-            
-            console.log('✓ Wallet ready:', shortAddr);
-        }
-        
-        // Subscribe to account changes
-        if (appKit.subscribeState) {
-            appKit.subscribeState((state) => {
-                console.log('Wallet state changed:', state);
-                if (state?.address) {
-                    const shortAddr = `${state.address.slice(0, 6)}...${state.address.slice(-4)}`;
-                    document.getElementById('address').textContent = shortAddr;
-                    console.log('✓ Wallet updated:', shortAddr);
-                }
-            });
-        }
-        
+
+        // Update UI safely
+        const addressEl = document.getElementById('address');
+        const networkEl = document.getElementById('network');
+        const walletInfo = document.getElementById('walletInfo');
+        const connectBtn = document.getElementById('connectBtn');
+        const topics = document.getElementById('topics');
+
+        if (addressEl) addressEl.textContent = `${address.slice(0,6)}...${address.slice(-4)}`;
+        if (networkEl) networkEl.textContent = 'Base Sepolia';
+        if (walletInfo) walletInfo.classList.remove('hidden');
+        if (connectBtn) connectBtn.style.display = 'none';
+        if (topics) topics.classList.remove('hidden');
+
+        console.log('Wallet connected successfully:', address);
     } catch (error) {
-        console.error('Wallet connection error:', error);
-        alert('Connection failed: ' + error.message);
+        console.error('Connection error:', error);
+        alert('Connection failed: ' + (error.message || 'Unknown error'));
     }
 }
+
+// ... (keep the rest of your original code unchanged: startQuiz, nextQuestion, etc.)
+
+
 function startQuiz(topic) {
     console.log('Quiz started! Topic:', topic);
     if (!contract) return alert('Connect wallet first!');
@@ -450,20 +315,27 @@ function shuffle(array) {
     return array;
 }
 
-// Load Storacha on script load
-loadStorachaClient().then(() => {
-    console.log('app.js fully ready!');
-    document.getElementById('loadStatus').textContent = 'Ready! Click Connect MetaMask.';
+
+// Load everything when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    loadStorachaClient();
+    console.log('DOM loaded - app ready');
+    // Safe navigation - only run if elements exist
+    const homeSection = document.getElementById('home');
+    if (homeSection) {
+        showPage('home');
+    }
 });
 
-// Navigation function
+// Navigation function with null checks
 function showPage(id) {
-    document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    const sections = document.querySelectorAll('section');
+    sections.forEach(s => {
+        if (s) s.classList.add('hidden');
+    });
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.remove('hidden');
+        target.scrollIntoView({ behavior: 'smooth' });
+    }
 }
-
-// Initial load
-showPage('home');
-
-
